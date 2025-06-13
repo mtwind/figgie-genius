@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Figgie Bot",
+  "version": "0.1.0",
+  "description": "A bot to assist with the Figgie game.",
+  "icons": {
+    "128": "figgie.png"
+  },
+  "action": {
+    "default_popup": "index.html"
+  }
+}

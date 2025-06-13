@@ -31,117 +31,71 @@ The goal of this project is to create a web extension that acts as a bot and can
 
 ## System Architecture and Tech Stack
 
+This project utilizes a modern, decoupled architecture designed for real-time data processing, intensive statistical analysis, and scalability. The system consists of a browser extension frontend that communicates with a powerful Python backend for analysis and data persistence.
+
 ### Frontend (Extension UI)
+
+The extension frontend is built to be fast, responsive, and type-safe.
+
 #### Core Framework
-- **Vite + React + TypeScript**
-  - Fast development and optimized builds
-  - Component-based UI architecture
-  - Type safety and better IDE support
-- **Tailwind CSS**
-  - Utility-first styling
-  - Rapid UI development
-  - Consistent design system
-- **Zustand**
-  - Lightweight state management
-  - TypeScript-first approach
-  - Simple API for extension state
+- **Vite + React + TypeScript**: Provides a fast development server, an optimized build process, and a robust, component-based UI architecture with type safety.
+- **Tailwind CSS**: A utility-first CSS framework for rapid and consistent UI development.
+- **Zustand**: A simple, lightweight state management library that is TypeScript-first and ideal for managing the state within the browser extension without excessive boilerplate.
 
 #### Chrome Extension Architecture
-- **Components**
-  - Popup UI (React + Tailwind)
-  - Content Script (TypeScript)
-  - Background Script (TypeScript)
-  - Service Worker (TypeScript)
-- **Development Tools**
-  - ESLint + Prettier for code quality
-  - Jest + React Testing Library for testing
-  - Chrome Extension TypeScript Definitions
+- **Content Script (TypeScript)**: Injected directly into the Figgie game page. It is responsible for all data scraping by observing DOM changes and capturing game events as they happen.
+- **Background Script / Service Worker (TypeScript)**: Acts as the communication hub. It manages the WebSocket connection to the backend, processes data from the content script, and maintains the core extension logic.
+- **Popup UI (React + Tailwind)**: The user-facing interface for displaying statistics, suggestions, and controlling the bot.
 
-### Backend (Data Processing)
-#### Python Server
-- **FastAPI**
-  - WebSocket + REST endpoints
-  - Automatic API documentation
-  - High performance
-- **Core Dependencies**
-  - numpy for numerical computations
-  - pandas for data analysis
-  - scipy for statistical analysis
-  - pydantic for data validation
-  - python-dotenv for environment management
+### Data Scraping & Communication
 
-#### WebSocket Communication
-- FastAPI WebSocket server
-- Client-side WebSocket manager
-- Real-time game data transfer
-- Type-safe message handling
+The link between the live game and the analysis engine is critical and built for speed.
 
-### Database
-#### PostgreSQL
-- **Tools**
-  - SQLAlchemy for ORM
-  - Alembic for migrations
-  - psycopg2 for database connection
-- **Features**
-  - ACID compliance
-  - Complex query support
-  - Time-series data optimization
+- **Data Scraping**: The Content Script will use the **`MutationObserver` API** and standard DOM APIs to efficiently watch for and capture real-time game events (new bids, trades, etc.) without needing to constantly poll the page.
+- **WebSocket Communication**: A persistent **WebSocket** connection, managed by the FastAPI backend and the extension's Background Script, is used for the real-time, bidirectional transfer of game data.
 
-### Development Environment
-#### Docker
-- **Containers**
-  - Frontend development
-  - Python backend
-  - PostgreSQL database
-- **Docker Compose**
-  - Service orchestration
-  - Development environment consistency
-  - Easy local setup
+### Backend (Data Processing & Analysis)
 
-### Monitoring and Error Tracking
-#### Sentry
-- Frontend error tracking
-- Backend error tracking
-- Performance monitoring
-- User session tracking
+The backend is a high-performance Python server dedicated to statistical analysis and strategy calculation.
 
-### API Documentation
-#### OpenAPI/Swagger
-- FastAPI automatic documentation
-- Interactive API testing
-- Comprehensive endpoint documentation
+- **Server**: **FastAPI** is used for its high performance, native asynchronous support (critical for WebSockets), and automatic OpenAPI documentation.
+- **Advanced Analytics**: The core statistical analysis and probability calculations will be performed using:
+    - **`numpy`** for high-performance numerical computations.
+    - **`pandas`** for data manipulation and analysis.
+    - **`scipy`** for advanced statistical functions.
+- **Data Validation**: **`pydantic`** is used for robust data validation and settings management within FastAPI.
+
+### Database & Data Storage
+
+A two-tiered data storage approach is used to balance real-time performance with long-term analytical capabilities.
+
+- **In-Memory (Live Game Data)**: **Redis** will be used as a fast, in-memory data store for caching the state of the current, live game. This ensures the bot can access data like player hands and current bids with minimal latency during a round.
+- **Persistent (Post-Game Analysis)**: **PostgreSQL** serves as the primary relational database. All data from a completed game is pushed to PostgreSQL for long-term storage, historical analysis, and potentially training future machine learning models.
+    - **Tools**: **SQLAlchemy** is used as the ORM for interacting with the database, with **Alembic** managing database migrations.
 
 ### Deployment
-#### Frontend: Vercel
-- Static hosting
-- CI/CD pipeline
-- Edge network distribution
 
-#### Backend: AWS
-- **Services**
-  - EC2 for Python server
-  - RDS for PostgreSQL
-  - CloudWatch for monitoring
-  - S3 for static assets
-- **Features**
-  - Scalable infrastructure
-  - Comprehensive monitoring
-  - Cost-effective scaling
+The deployment strategy leverages modern platforms optimized for their respective tasks.
 
-### Development Workflow
-#### Version Control
-- Git for source control
-- GitHub Actions for CI/CD
-- Automated testing and deployment
+- **Frontend (Vercel)**: The React-based extension frontend will be deployed using Vercel for its seamless static hosting, CI/CD pipelines, and global edge network.
+- **Backend (AWS)**: A scalable infrastructure using **EC2** for the Python server and **RDS** for the PostgreSQL database, with **CloudWatch** for monitoring.
 
-#### Code Quality
-- ESLint + Prettier
-- TypeScript strict mode
-- Python type hints
-- Automated code formatting
+### Key Architectural Considerations
+
+- **Scraping Stability**: The success of the bot is highly dependent on the stability of the content script's selectors. The Figgie website UI could change at any time, requiring updates to the scraping logic.
+- **Anti-Bot Measures**: The target website may have measures to detect and block automated bots. The bot's design, particularly if it plays automatically, should consider strategies (e.g., randomized delays) to mimic human-like interaction and avoid detection.
+
+### Development Environment & Tooling
+
+- **Containerization (Docker)**: Docker and Docker Compose will be used to containerize the frontend, backend, and database services for a consistent and easy-to-set-up local development environment.
+- **Monitoring (Sentry)**: Sentry will be used for real-time error tracking and performance monitoring on both the frontend and backend.
+- **API Documentation (OpenAPI/Swagger)**: FastAPI will automatically generate interactive API documentation.
+- **Version Control (Git & GitHub Actions)**: Git will be used for source control, with GitHub Actions automating CI/CD pipelines for testing and deployment.
 
 ### Project Structure
+
 ```
+
 figgie/
 ├── frontend/                 # Extension frontend
 │   ├── src/
