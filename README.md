@@ -1,4 +1,4 @@
-# Figgie
+# Figgie Genius
 
 Figgie is a game designed by Jane Street to simulate market making and options trading.
 
