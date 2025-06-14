@@ -1,25 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "Figgie Bot",
-  "version": "0.1.0",
-  "description": "A bot to assist with the Figgie game.",
-  "icons": {
-    "128": "figgie.png"
+  "name": "Figgie Genius",
+  "version": "1.0",
+  "description": "An extension to provide analysis for the Figgie game.",
+  "background": {
+    "service_worker": "service-worker.js"
   },
   "permissions": [
-    "storage",
+    "sidePanel",
     "tabs"
   ],
-  "background": {
-    "service_worker": "background.js"
-  },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
-    }
-  ],
   "action": {
-    "default_popup": "index.html"
+    "default_title": "Click to open Figgie Genius"
+  },
+  "icons": {
+    "16": "figgie.png",
+    "48": "figgie.png",
+    "128": "figgie.png"
   }
 }
