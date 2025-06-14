@@ -12,7 +12,6 @@ chrome.sidePanel
 chrome.tabs.onUpdated.addListener(async (tabId, _info, tab) => {
   if (!tab.url) return;
   const url = new URL(tab.url);
-  console.log(url);
 
   // Check if the user is on the Figgie game page
   const isFiggiePage = url.href.startsWith(figgieUrl);

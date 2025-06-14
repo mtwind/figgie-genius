@@ -1,37 +1,55 @@
-// src/components/GameDashboard.tsx
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
+// frontend/src/components/GameDashboard.tsx
 
-function GameDashboard() {
-  // In the future, you'll have a useEffect here to get game data
-  // from the content script.
+import Data from "@/components/tabs/Data";
+import Genius from "@/components/tabs/Genius";
+import Home from "@/components/tabs/Home";
+import Logs from "@/components/tabs/Logs";
+import { Box } from "@mui/material";
+import React, { useState } from "react";
+import DashboardHeader from "./DashboardHeader";
+
+const GameDashboard = () => {
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue);
+  };
+
+  const renderActiveComponent = () => {
+    switch (selectedTab) {
+      case 0:
+        return <Home />;
+      case 1:
+        return <Genius />;
+      case 2:
+        return <Data />;
+      case 3:
+        return <Logs />;
+      default:
+        return <Home />;
+    }
+  };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Game Dashboard
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
-      <Container sx={{ p: 2, flexGrow: 1 }}>
-        <Paper elevation={2} sx={{ p: 2 }}>
-          <Typography variant="body1">
-            You are on the Figgie play page!
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
-            This is where your game data and analysis will appear.
-          </Typography>
-        </Paper>
-      </Container>
+    // This Box will now correctly fill the #root element, which is full-size.
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
+        p: 0,
+      }}
+    >
+      <DashboardHeader
+        selectedTab={selectedTab}
+        onTabChange={handleTabChange}
+      />
+      <Box sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
+        {renderActiveComponent()}
+      </Box>
     </Box>
   );
-}
+};
 
 export default GameDashboard;

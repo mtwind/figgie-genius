@@ -30,7 +30,7 @@ function PlayNowScreen() {
         Figgie Genius
       </Typography>
       <Typography variant="body1" sx={{ color: "text.secondary", mb: 3 }}>
-        This sidebar is active when you are on the Figgie play page.
+        Uh uh, it looks like you aren't on the Play Figgie page...
       </Typography>
       <Button
         variant="contained"
