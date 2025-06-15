@@ -1,4 +1,4 @@
-function parseUserHand() {
+export function parseUserHand() {
     // Step 1: Find the user's unique avatar icon first. This is our unshakable anchor.
     // The 'user_icon_tophat_0_svg__a' ID is unique to the player's avatar.
     const avatarElement = document.querySelector('svg[id*="user_icon_tophat"]');

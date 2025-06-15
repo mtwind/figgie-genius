@@ -1,4 +1,4 @@
-function parseOpponentHands() {
+export function parseOpponentHands() {
     // Find the user's container to use as a stable anchor point.
     const userContainer = document.querySelector(
       'div[style*="border-top-left-radius: 2px"]'

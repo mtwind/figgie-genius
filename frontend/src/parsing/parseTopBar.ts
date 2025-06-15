@@ -1,4 +1,4 @@
-function parseTopBar() {
+export function parseTopBar() {
     // Find the timer by searching for the element whose text includes a colon ':'
     const timerElement = Array.from(document.querySelectorAll('div[dir="auto"]'))
                               .find(el => el.innerText.includes(':'));
