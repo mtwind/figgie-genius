@@ -13,4 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true
   },
+  "exclude": [
+    "src/console-helpers" 
+  ]
 }

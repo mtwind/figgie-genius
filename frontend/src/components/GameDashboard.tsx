@@ -11,7 +11,7 @@ import DashboardHeader from "./DashboardHeader";
 const GameDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
 

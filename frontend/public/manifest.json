@@ -2,20 +2,26 @@
   "manifest_version": 3,
   "name": "Figgie Genius",
   "version": "1.0",
-  "description": "An extension to provide analysis for the Figgie game.",
+  "description": "A side panel extension for the Figgie game.",
+  "permissions": ["sidePanel", "tabs"],
   "background": {
     "service_worker": "service-worker.js"
   },
-  "permissions": [
-    "sidePanel",
-    "tabs"
-  ],
   "action": {
-    "default_title": "Click to open Figgie Genius"
+    "default_title": "Open Figgie Genius"
+  },
+  "side_panel": {
+    "default_path": "sidepanel-welcome.html"
   },
   "icons": {
     "16": "figgie.png",
     "48": "figgie.png",
     "128": "figgie.png"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
 }

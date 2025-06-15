@@ -17,7 +17,8 @@ export default defineConfig({
       input: {
         'service-worker': resolve(__dirname, 'src/background.ts'),
         'sidepanel-main': resolve(__dirname, 'sidepanel-main.html'),
-        'sidepanel-welcome': resolve(__dirname, 'sidepanel-welcome.html')
+        'sidepanel-welcome': resolve(__dirname, 'sidepanel-welcome.html'),
+        'content': resolve(__dirname, 'src/content.ts') 
       },
       output: {
         entryFileNames: `[name].js`,
