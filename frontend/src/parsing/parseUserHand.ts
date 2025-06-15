@@ -1,7 +1,9 @@
 // src/parsing/parseUserHand.ts
 
-// Define a clear shape for the data this function will return.
-interface UserHand {
+/**
+ * Defines the shape for the user's data object, ensuring type safety.
+ */
+interface UserData {
   name: string;
   color: string;
   chips: string;
@@ -9,64 +11,57 @@ interface UserHand {
   hand: { [key: string]: number };
 }
 
-// Add the return type to the function signature.
-export function parseUserHand(): UserHand | null {
-  // Find all chip icons to reliably identify the four player header bars.
-  const allChipIcons = document.querySelectorAll('svg[id*="chip_desktop_svg"]');
+/**
+ * Parses the user's dashboard by anchoring on the stable chip icon
+ * and traversing the HTML structure. This function is font-size safe and type-safe.
+ * @returns A UserData object or null if parsing fails.
+ */
+export function parseUserHand(): UserData | null {
+  // Step 1: Find the chip icon in the header. This is our unique and reliable anchor.
+  const chipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');
+
+  if (!chipIcon) {
+    console.error("Could not find the user's chip icon to anchor the search.");
+    return null;
+  }
+
+  // Step 2: From the icon, find the header bar and the main user container.
+  const headerBar = chipIcon.closest('div[style*="background-color"]') as HTMLElement | null;
+  const userContainer = headerBar?.parentElement;
+
+  if (!headerBar || !userContainer) {
+    console.error("Could not find the user's header or main container from the chip icon.");
+    return null;
+  }
   
-  if (allChipIcons.length === 0) {
-    console.error("Could not find any chip icons on the page.");
-    return null;
-  }
+  // --- Step 3: Now that we have the correct containers, parse the data ---
 
-  // TS-FIX: Add an explicit type for the variable.
-  let userHeaderBar: HTMLElement | null = null;
-
-  // Loop through the NodeList of icons.
-  for (const icon of allChipIcons) {
-    // Find the containing header bar for this icon.
-    // TS-FIX: Assert the result of .closest() to be an HTMLElement.
-    const headerBar = icon.closest('div[style*="background-color"]') as HTMLElement | null;
-    if (!headerBar) continue;
-
-    // Check if THIS header bar contains the user's unique larger font size.
-    const largeText = headerBar.querySelector('div[style*="font-size: 20px"]');
-    if (largeText) {
-      userHeaderBar = headerBar;
-      break;
-    }
-  }
-
-  if (!userHeaderBar) {
-    console.error("Could not find the user's header bar by process of elimination.");
-    return null;
-  }
-
-  const userContainer = userHeaderBar.parentElement;
-  if (!userContainer) return null;
-
-  // Parse Color
-  const backgroundColor = userHeaderBar.style.backgroundColor;
+  // Parse Color from the header's background.
+  const backgroundColor = headerBar.style.backgroundColor;
   let color = 'unknown';
   if (backgroundColor.includes('39, 115, 222')) color = 'blue';
   else if (backgroundColor.includes('26, 167, 123')) color = 'green';
   else if (backgroundColor.includes('239, 64, 67')) color = 'red';
   else if (backgroundColor.includes('239, 168, 35')) color = 'orange';
 
-  // Parse Name and Chips
-  const textElementsInBar = userHeaderBar.querySelectorAll('div[style*="font-size: 20px"]');
-  const name = (textElementsInBar[0] as HTMLElement)?.innerText.trim() || 'N/A';
-  const chips = (textElementsInBar[1] as HTMLElement)?.innerText.trim() || 'N/A';
+  // Parse Name and Chips by their position relative to the chip icon.
+  const chipIconContainer = chipIcon.parentElement;
+  const nameElement = chipIconContainer?.previousElementSibling?.querySelector('div[dir="auto"]') as HTMLElement | null;
+  const name = nameElement?.innerText.trim() || 'N/A';
   
-  // TS-FIX: Give the 'hand' object an explicit index signature.
+  const chipsElement = chipIcon.nextElementSibling as HTMLElement | null;
+  const chips = chipsElement?.innerText.trim() || 'N/A';
+
+  // Parse Hand and Total Cards from the card row below the header.
   const hand: { [key: string]: number } = {};
   let totalCards = 0;
   const cardRow = userContainer.querySelector('div[style*="align-self: center"]');
 
   if (cardRow) {
-    // TS-FIX: Convert HTMLCollection to an array to loop safely.
     for (const cardDiv of Array.from(cardRow.children)) {
-      const countStr = (cardDiv.querySelector('div[style*="font-size: 20px"]') as HTMLElement)?.innerText || '0';
+      // Find the card count div by its structural position.
+      const countElement = cardDiv.querySelector('div[dir="auto"]') as HTMLElement | null;
+      const countStr = countElement?.innerText || '0';
       const count = parseInt(countStr, 10);
       
       const svgId = cardDiv.querySelector('svg')?.id || '';
@@ -83,7 +78,7 @@ export function parseUserHand(): UserHand | null {
     }
   }
 
-  const userData: UserHand = {
+  const userData: UserData = {
     name,
     color,
     chips,
@@ -91,6 +86,5 @@ export function parseUserHand(): UserHand | null {
     hand,
   };
 
-  console.log("User Data (Final, Type-Safe Version):", userData);
   return userData;
 }

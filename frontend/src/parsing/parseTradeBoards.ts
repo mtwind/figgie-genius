@@ -1,5 +1,8 @@
 // src/parsing/parseTradeBoards.ts
 
+/**
+ * Defines the shape for a single trade board entry, ensuring type safety.
+ */
 interface TradeBoardEntry {
   lastSale: string;
   bid: string;
@@ -8,35 +11,43 @@ interface TradeBoardEntry {
   offerColor: string;
 }
 
-export function parseTradeBoards() {
-  const userContainer = document.querySelector(
-    'div[style*="border-top-left-radius: 2px"]'
-  );
-  if (!userContainer) return {};
-
-  const opponentsWrapper = userContainer.nextElementSibling;
-  if (!opponentsWrapper) return {};
-
-  const tradeBoardsContainer = opponentsWrapper.nextElementSibling;
-  if (!tradeBoardsContainer) {
-    console.error("Could not find the trade boards container.");
+/**
+ * Parses the data for all four trade boards by anchoring on the user's dashboard
+ * and then navigating structurally. This function is completely size-agnostic and type-safe.
+ * @returns A record object where keys are suit names and values are TradeBoardEntry objects.
+ */
+export function parseTradeBoards(): Record<string, TradeBoardEntry> {
+  // Step 1 & 2: Use the working logic to find the user's main container.
+  const userChipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');
+  if (!userChipIcon) {
+    console.error("Could not find the user's chip icon to start the search.");
+    return {};
+  }
+  const userContainer = userChipIcon.closest('div[style*="background-color: rgb(255, 255, 255)"]');
+  if (!userContainer) {
+    console.error("Could not find the user's main container from the chip icon.");
     return {};
   }
 
-  // FIX: Add an explicit type for the main data object.
-  const tradeBoardsData: Record<string, TradeBoardEntry> = {};
-  
-  const suitRows = tradeBoardsContainer.querySelectorAll('div[style*="min-height: 95px"]');
-  
-  for (const suitRow of Array.from(suitRows)) {
-    const innerRow = suitRow.querySelector('div[style*="min-height: 95px"]');
-    if (!innerRow || innerRow.children.length < 3) continue;
+  // Step 3: Find the trade boards container relative to the user's container.
+  const opponentsWrapper = userContainer.nextElementSibling;
+  const tradeBoardsContainer = opponentsWrapper?.nextElementSibling;
+  if (!tradeBoardsContainer) {
+    console.error("Could not find the trade boards' container.");
+    return {};
+  }
 
-    const [bidSide, centerIconContainer, offerSide] = Array.from(innerRow.children);
+  const tradeBoardsData: Record<string, TradeBoardEntry> = {};
+  const suitRowWrappers = tradeBoardsContainer.children;
+
+  for (const wrapper of Array.from(suitRowWrappers)) {
+    const suitRow = wrapper.firstElementChild;
+    if (!suitRow || suitRow.children.length < 3) continue;
+    
+    const [bidSide, centerIconContainer, offerSide] = Array.from(suitRow.children);
 
     const suitIcon = centerIconContainer.querySelector('svg');
-    // FIX: Assert the element as HTMLElement to access .innerText.
-    const lastSaleElement = centerIconContainer.querySelector('div[style*="font-size: 16px;"]') as HTMLElement | null;
+    const lastSaleElement = centerIconContainer.querySelector('div[dir="auto"]') as HTMLElement | null;
     const lastSale = lastSaleElement?.innerText.trim() || 'N/A';
 
     let suit = 'Unknown';
@@ -48,7 +59,6 @@ export function parseTradeBoards() {
       else if (pathData.includes('M55.11')) suit = 'Hearts';
     }
 
-    // FIX: Add type for the helper function's parameter.
     const parseColorFromStyle = (element: Element | null): string => {
       const style = (element as HTMLElement)?.style.backgroundImage;
       if (!style) return 'none';
@@ -59,21 +69,26 @@ export function parseTradeBoards() {
       return 'none';
     };
 
-    const bidPriceElement = bidSide.querySelector('div[style*="font-size: 24px"]') as HTMLElement | null;
-    const bidPrice = bidPriceElement ? bidPriceElement.innerText.trim() : "";
-
-    const offerPriceElement = offerSide.querySelector('div[style*="font-size: 24px"]') as HTMLElement | null;
-    const offerPrice = offerPriceElement ? offerPriceElement.innerText.trim() : "";
-    
     const bidDisplay = bidSide.querySelector('div[style*="background-image"]');
+    const bidPriceElement = bidDisplay?.querySelector('div[dir="auto"]') as HTMLElement | null;
+    const bidPrice = bidPriceElement?.innerText.trim() || "";
     const bidColor = parseColorFromStyle(bidDisplay);
-    
+
     const offerDisplay = offerSide.querySelector('div[style*="background-image"]');
+    const offerPriceElement = offerDisplay?.querySelector('div[dir="auto"]') as HTMLElement | null;
+    const offerPrice = offerPriceElement?.innerText.trim() || "";
     const offerColor = parseColorFromStyle(offerDisplay);
 
     if (suit !== 'Unknown') {
-      tradeBoardsData[suit] = { lastSale, bid: bidPrice, bidColor, offer: offerPrice, offerColor };
+      tradeBoardsData[suit] = {
+        lastSale,
+        bid: bidPrice,
+        bidColor,
+        offer: offerPrice,
+        offerColor
+      };
     }
   }
+
   return tradeBoardsData;
 }
