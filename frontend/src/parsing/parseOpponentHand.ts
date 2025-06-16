@@ -1,22 +1,6 @@
 // src/parsing/parseOpponentHand.ts
 
-/**
- * Defines the shape for the card changes object.
- */
-interface CardChanges {
-  [key: string]: string;
-}
-
-/**
- * Defines the shape for a single opponent's data object for type safety.
- */
-interface OpponentData {
-  name: string;
-  color: string;
-  chips: string;
-  totalCards: number;
-  cardChanges: CardChanges;
-}
+import type { PlayerData } from "@/types";
 
 /**
  * Parses the data for all opponents by anchoring on the user's dashboard and
@@ -24,7 +8,7 @@ interface OpponentData {
  * completely size-agnostic and type-safe.
  * @returns An array of OpponentData objects or an empty array if parsing fails.
  */
-export function parseOpponentHands(): OpponentData[] {
+export function parseOpponentHands(): PlayerData[] {
   // Step 1: Find the user's chip icon first, which we know is a reliable anchor.
   const userChipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');
   if (!userChipIcon) {
@@ -46,7 +30,7 @@ export function parseOpponentHands(): OpponentData[] {
     return [];
   }
 
-  const opponentsData: OpponentData[] = [];
+  const opponentsData: PlayerData[] = [];
   const opponentContainers = opponentsWrapper.children;
 
   for (const container of Array.from(opponentContainers)) {
@@ -75,7 +59,8 @@ export function parseOpponentHands(): OpponentData[] {
     const totalCards = totalCardsElement ? parseInt(totalCardsElement.innerText.trim(), 10) : 0;
     
     // Find Card Changes (+/-) using a structural selector
-    const cardChanges: CardChanges = {};
+    const hand: { [key: string]: number } = {};
+    const cardChanges: { [key: string]: string } = {};
     const tradesContainer = container.querySelector('div[style*="flex-direction: column;"]');
     
     if (tradesContainer) {
@@ -94,17 +79,22 @@ export function parseOpponentHands(): OpponentData[] {
 
         if (suit !== 'Unknown') {
           cardChanges[suit] = tradeValueElement.innerText.trim() || '0';
+          hand[suit] = 0;
         }
       }
     }
 
-    opponentsData.push({
+    const playerData: PlayerData = {
+      isUser: false, // Flag this player as the user
       name,
       color,
       chips,
       totalCards,
+      hand,
       cardChanges,
-    });
+    };
+
+    opponentsData.push(playerData);
   }
 
   return opponentsData;

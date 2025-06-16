@@ -1,23 +1,14 @@
 // src/parsing/parseUserHand.ts
 
-/**
- * Defines the shape for the user's data object, ensuring type safety.
- */
-interface UserData {
-  name: string;
-  color: string;
-  chips: string;
-  totalCards: number;
-  hand: { [key: string]: number };
-}
+import type { PlayerData } from '@/types'; // Import your main UserData interface
 
 /**
- * Parses the user's dashboard by anchoring on the stable chip icon
- * and traversing the HTML structure. This function is font-size safe and type-safe.
+ * Parses the user's dashboard by anchoring on the stable chip icon and traversing
+ * the HTML structure. This function is completely size-agnostic and type-safe.
  * @returns A UserData object or null if parsing fails.
  */
-export function parseUserHand(): UserData | null {
-  // Step 1: Find the chip icon in the header. This is our unique and reliable anchor.
+export function parseUserHand(): PlayerData | null {
+  // Step 1: Find the user's chip icon, our reliable anchor.
   const chipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');
 
   if (!chipIcon) {
@@ -36,7 +27,7 @@ export function parseUserHand(): UserData | null {
   
   // --- Step 3: Now that we have the correct containers, parse the data ---
 
-  // Parse Color from the header's background.
+  // Parse Color
   const backgroundColor = headerBar.style.backgroundColor;
   let color = 'unknown';
   if (backgroundColor.includes('39, 115, 222')) color = 'blue';
@@ -52,8 +43,9 @@ export function parseUserHand(): UserData | null {
   const chipsElement = chipIcon.nextElementSibling as HTMLElement | null;
   const chips = chipsElement?.innerText.trim() || 'N/A';
 
-  // Parse Hand and Total Cards from the card row below the header.
+  // Parse Hand, Card Changes, and Total Cards
   const hand: { [key: string]: number } = {};
+  const cardChanges: { [key: string]: string } = {};
   let totalCards = 0;
   const cardRow = userContainer.querySelector('div[style*="align-self: center"]');
 
@@ -64,6 +56,10 @@ export function parseUserHand(): UserData | null {
       const countStr = countElement?.innerText || '0';
       const count = parseInt(countStr, 10);
       
+      // Correctly find the changeElement as the next sibling of the countElement.
+      const changeElement = countElement?.nextElementSibling as HTMLElement | null;
+      const changeStr = changeElement?.innerText.trim() || '+0';
+      
       const svgId = cardDiv.querySelector('svg')?.id || '';
       let suit = 'Unknown';
       if (svgId.includes('spades')) suit = 'Spades';
@@ -73,17 +69,20 @@ export function parseUserHand(): UserData | null {
       
       if (suit !== 'Unknown') {
         hand[suit] = count;
+        cardChanges[suit] = changeStr;
         totalCards += count;
       }
     }
   }
 
-  const userData: UserData = {
+  const userData: PlayerData = {
+    isUser: true, // Flag this player as the user
     name,
     color,
     chips,
     totalCards,
     hand,
+    cardChanges,
   };
 
   return userData;

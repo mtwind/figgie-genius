@@ -1,5 +1,5 @@
 // function parseUserHand() {
-//     // Step 1: Find the chip icon in the header. This is our unique and reliable anchor.
+//     // Step 1: Find the user's chip icon, our reliable anchor.
 //     const chipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');
   
 //     if (!chipIcon) {
@@ -36,15 +36,20 @@
   
 //     // Parse Hand and Total Cards from the card row below the header.
 //     const hand = {};
+//     const cardChanges = {};
 //     let totalCards = 0;
 //     const cardRow = userContainer.querySelector('div[style*="align-self: center"]');
   
 //     if (cardRow) {
 //       for (const cardDiv of cardRow.children) {
-//         // Find the card count div by its structural position, not its font size.
+//         // Find the card count div first.
 //         const countElement = cardDiv.querySelector('div[dir="auto"]');
 //         const countStr = countElement?.innerText || '0';
 //         const count = parseInt(countStr, 10);
+  
+//         // --- FIX: Correctly find the changeElement as the next sibling of the countElement ---
+//         const changeElement = countElement?.nextElementSibling;
+//         const changeStr = changeElement?.innerText.trim() || '+0';
         
 //         const svgId = cardDiv.querySelector('svg')?.id || '';
 //         let suit = 'Unknown';
@@ -56,6 +61,7 @@
         
 //         if (suit !== 'Unknown') {
 //           hand[suit] = count;
+//           cardChanges[suit] = changeStr;
 //           totalCards += count;
 //         }
 //       }
@@ -67,10 +73,11 @@
 //       chips,
 //       totalCards,
 //       hand,
+//       cardChanges,
 //     };
   
 //     console.log("User Data (Final Console Version):", userData);
 //     return userData;
 //   }
 
-//   console.log(parseUserHand);
+//   console.log(parseUserHand());

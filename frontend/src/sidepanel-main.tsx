@@ -1,5 +1,5 @@
 // frontend/src/sidepanel-main.tsx
-import GameDashboard from "@/components/GameDashboard"; // Your main dashboard component
+import GameDashboard from "@/components/general/GameDashboard"; // Your main dashboard component
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";

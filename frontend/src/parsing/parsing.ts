@@ -24,11 +24,13 @@ export function getGameStateSnapshot() {
   // The first element in the tradeHistory array is the most recent one.
   const lastTrade = tradeHistory[0] || null;
 
+  console.log(user, opponents);
+
+  const players = [user, ...opponents];
   // Step 4: Assemble all the data into a single, comprehensive object.
   const fullGameState = {
     gameInfo,
-    user,
-    opponents,
+    players,
     markets,
     lastTrade
   };
