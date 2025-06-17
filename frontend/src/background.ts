@@ -31,7 +31,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, _info, tab) => {
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   // Listen for updates from the content script
   if (message.type === "GAME_STATE_UPDATE") {
-    console.log("Background script received new game state.");
+    // console.log("Background script received new game state.");
     latestGameState = message.payload;
   }
 

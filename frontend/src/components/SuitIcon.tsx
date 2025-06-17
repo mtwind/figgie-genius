@@ -5,9 +5,10 @@ import { Box } from "@mui/material";
 // Define the component's props for type safety
 interface SuitIconProps {
   suit: string;
+  size?: { width: string; height: string };
 }
 
-export const SuitIcon = ({ suit }: SuitIconProps) => {
+export const SuitIcon = ({ suit, size }: SuitIconProps) => {
   // If the suit is unknown, don't render anything.
   if (!suit || suit === "Unknown") {
     return null;
@@ -25,8 +26,8 @@ export const SuitIcon = ({ suit }: SuitIconProps) => {
       alt={`${suit} icon`}
       // Apply styling to control the size of the icon
       sx={{
-        width: "20px",
-        height: "20px",
+        width: size ? size.width : "20px",
+        height: size ? size.height : "20px",
       }}
     />
   );

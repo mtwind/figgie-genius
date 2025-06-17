@@ -40,7 +40,6 @@ const GameDashboard = () => {
       payload: FullGameState;
     }) => {
       if (message.type === "GAME_STATE_UPDATE") {
-        console.log("Dashboard received state update:", message.payload);
         setGameState(message.payload);
       }
     };
@@ -57,9 +56,9 @@ const GameDashboard = () => {
       case 0:
         return <Home gameState={gameState} />;
       case 1:
-        return <Genius gameState={gameState} />;
+        return <Genius />;
       case 2:
-        return <Data gameState={gameState} />;
+        return <Data />;
       case 3:
         return <Logs gameState={gameState} />;
       default:

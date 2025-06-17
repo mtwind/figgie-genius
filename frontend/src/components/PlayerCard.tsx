@@ -1,29 +1,23 @@
 // src/components/PlayerCard.tsx
 
 import { SuitIcon } from "@/components/SuitIcon";
+import type { PlayerData } from "@/types";
 import { Box, Paper, Typography } from "@mui/material";
 
-// FIX 1: The props interface now matches how the component is being called in Home.tsx.
-// It accepts individual props instead of a single 'player' object.
 interface PlayerCardProps {
-  isUser: boolean;
-  playerName: string;
-  playerColor: string;
-  chips: string | number;
-  totalCards: number;
-  hand: { [key: string]: number | string };
-  cardChanges: { [key: string]: number | string };
+  player: PlayerData;
 }
 
-export const PlayerCard = ({
-  isUser,
-  playerName,
-  playerColor,
-  chips,
-  totalCards,
-  hand,
-  cardChanges,
-}: PlayerCardProps) => {
+export const PlayerCard = ({ player }: PlayerCardProps) => {
+  const {
+    isUser,
+    name: playerName,
+    color: playerColor,
+    chips,
+    totalCards,
+    hand,
+    cardChanges,
+  } = player;
   const colorMap: { [key: string]: string } = {
     blue: "#2773de",
     green: "#1aa77b",
@@ -34,7 +28,6 @@ export const PlayerCard = ({
 
   console.log(isUser);
   const backgroundColor = colorMap[playerColor] || colorMap.unknown;
-
   return (
     <Paper
       sx={{
@@ -42,9 +35,10 @@ export const PlayerCard = ({
         overflow: "hidden",
         mb: 1,
         border: "1px solid #e0e0e0",
-        maxWidth: 220,
+        width: 150,
       }}
     >
+      {" "}
       {/* Header Box */}
       <Box
         sx={{
@@ -53,8 +47,8 @@ export const PlayerCard = ({
           display: "grid",
           gridTemplateColumns: "1fr 2fr",
           alignItems: "center",
-          minHeight: "60px",
-          p: 1,
+          height: "55px",
+          p: 0.75,
         }}
       >
         {/* Left Column: Card Icon with Total Cards inside */}
@@ -68,50 +62,69 @@ export const PlayerCard = ({
         >
           <Box
             component="img"
-            src="/cards/deck.png"
+            src="cards.png"
             alt="cards"
-            sx={{ width: 32, height: 32 }}
+            sx={{ width: 48, height: 48 }}
           />
           <Typography
             sx={{
               position: "absolute",
-              fontSize: "0.9rem",
+              top: "50%",
+              left: "55%",
+              transform: "translate(-50%, -50%)",
+              fontSize: "1.2rem",
               fontWeight: "bold",
-              color: "black",
+              color: "white",
             }}
           >
             {totalCards}
           </Typography>
         </Box>
 
-        {/* Right Column: Name stacked above Chips */}
+        {/* Right Column: Centered Name and Chips */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-end",
-            gap: 0.2,
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            width: "100%",
+            gap: 0.25,
           }}
         >
+          {" "}
           <Typography
-            sx={{ fontWeight: "bold", fontSize: "0.9rem", textAlign: "right" }}
+            sx={{
+              fontWeight: "bold",
+              textAlign: "center",
+              width: "100%",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              display: "block",
+              textOverflow: "clip",
+              fontSize: "clamp(0.6rem, 8cqw, 1.2rem)",
+              containerType: "inline-size",
+            }}
           >
             {playerName}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
             <Box
               component="img"
-              src="/chips/chip.png"
+              src="chips.png"
               alt="chips"
-              sx={{ width: 16, height: 16 }}
+              sx={{ width: 24, height: 24 }}
             />
-            <Typography sx={{ fontSize: "0.8rem" }}>{chips}</Typography>
+            <Typography sx={{ fontSize: "1rem", textAlign: "center" }}>
+              {chips}
+            </Typography>
           </Box>
         </Box>
-      </Box>
-
+      </Box>{" "}
       {/* Lower Box with Suit Details */}
-      <Box sx={{ py: 0.5, px: 1 }}>
+      <Box sx={{ py: 0.25, px: 0.5 }}>
+        {" "}
         {["Spades", "Clubs", "Diamonds", "Hearts"].map((suit) => (
           <Box
             key={suit}
@@ -120,11 +133,12 @@ export const PlayerCard = ({
               justifyContent: "space-between",
               alignItems: "center",
               my: 0.5,
+              gap: 0.25,
             }}
           >
             <Typography
               sx={{
-                width: "40px",
+                width: "30px",
                 textAlign: "center",
                 fontSize: "0.8rem",
                 fontWeight: "bold",
@@ -135,9 +149,8 @@ export const PlayerCard = ({
 
             <SuitIcon suit={suit} />
 
-            {/* FIX 2: Use a simple placeholder for the right-side numbers as requested. */}
             <Typography
-              sx={{ width: "40px", textAlign: "center", fontSize: "0.8rem" }}
+              sx={{ width: "30px", textAlign: "center", fontSize: "0.8rem" }}
             >
               {cardChanges[suit] || "0"}
             </Typography>

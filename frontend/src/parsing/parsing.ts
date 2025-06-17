@@ -36,8 +36,8 @@ export function getGameStateSnapshot() {
   };
 
   // Optional: Log the final object to the console for easy debugging.
-  console.log("--- FIGGIE GENIUS: FULL GAME STATE SNAPSHOT ---");
-  console.log(JSON.stringify(fullGameState, null, 2));
+  // console.log("--- FIGGIE GENIUS: FULL GAME STATE SNAPSHOT ---");
+  // console.log(JSON.stringify(fullGameState, null, 2));
 
   return fullGameState;
 }
