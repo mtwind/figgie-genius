@@ -2,11 +2,11 @@
 
 // Step 1: Import all the working parser functions from their respective files.
 // (Assuming they are in the same directory, adjust paths if needed)
-import { parseOpponentHands } from '@/parsing/parseOpponentHand';
-import { parseTopBar } from '@/parsing/parseTopBar';
-import { parseTradeBoards } from '@/parsing/parseTradeBoards';
-import { parseTradeHistory } from '@/parsing/parseTradeHistory';
-import { parseUserHand } from '@/parsing/parseUserHand';
+import { parseOpponentHands } from '@/parsing/legacy/parseOpponentHand';
+import { parseTopBar } from '@/parsing/legacy/parseTopBar';
+import { parseTradeBoards } from '@/parsing/legacy/parseTradeBoards';
+import { parseTradeHistory } from '@/parsing/legacy/parseTradeHistory';
+import { parseUserHand } from '@/parsing/legacy/parseUserHand';
 
 /**
  * Executes all individual parsing functions to capture a complete snapshot of the game state.

@@ -14,28 +14,28 @@
 //       else if (rgbString.includes('39, 115, 222')) return 'blue';
 //       return 'unknown';
 //     };
-  
+
 //     // Select the inner div which is the actual row with the columns
-//     const tradeRowElement = tradeRowWrapper.querySelector('div[aria-disabled="true"]');
-//     if (!tradeRowElement) {
-//       console.error("Could not find the inner [aria-disabled='true'] row element.");
-//       return null;
-//     }
-  
-//     const columns = tradeRowElement.children;
+//     // const tradeRowElement = tradeRowWrapper.querySelector('div[aria-disabled="true"]');
+//     // if (!tradeRowElement) {
+//     //   console.error("Could not find the inner [aria-disabled='true'] row element.");
+//     //   return null;
+//     // }
+
+//     const columns = tradeRowWrapper.children;
 //     if (columns.length < 4) {
 //       console.error(`Found the row, but it only has ${columns.length} columns, not 4.`);
 //       return null;
 //     }
-  
+
 //     // --- Parse all data points from the row ---
-  
+
 //     const buyerNameElement = columns[0].querySelector('div[dir="auto"]');
 //     const buyer = {
 //       name: buyerNameElement?.innerText.trim() || 'N/A',
 //       color: parseColorFromRgb(buyerNameElement?.style.color)
 //     };
-  
+
 //     const suitIcon = columns[1].querySelector('svg');
 //     let suit = 'Unknown';
 //     if (suitIcon) {
@@ -45,33 +45,33 @@
 //       else if (pathData.includes('M30.9')) suit = 'Diamonds';
 //       else if (pathData.includes('M55.11')) suit = 'Hearts';
 //     }
-    
+
 //     const sellerNameElement = columns[2].querySelector('div[dir="auto"]');
 //     const seller = {
 //       name: sellerNameElement?.innerText.trim() || 'N/A',
 //       color: parseColorFromRgb(sellerNameElement?.style.color)
 //     };
-  
+
 //     const price = parseInt(columns[3].innerText.trim(), 10) || 0;
-  
+
 //     // --- Create two separate data objects ---
-  
+
 //     const buyerEvent = {
 //       player: buyer,
 //       type: 'BUY',
 //       suit: suit,
 //       price: price,
 //     };
-  
+
 //     const sellerEvent = {
 //       player: seller,
 //       type: 'SELL',
 //       suit: suit,
 //       price: price,
 //     };
-  
+
 //     const tradeData = [buyerEvent, sellerEvent];
-  
+
 //     console.log("Parsed Trade Row (Buyer & Seller):", tradeData);
 //     return tradeData;
 //   }

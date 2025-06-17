@@ -1,30 +1,31 @@
-// function parseTopBar() {
-//     console.log("--- Running Final Top Bar Parser ---");
+// /**
+//  * Parses the top bar HTML element to extract time, game name, and round number.
+//  * @param {HTMLElement} topBarElement The main div element for the top bar.
+//  * @returns {object|null} An object with the parsed info, or null if parsing fails.
+//  */
+// function parseTopBar(topBarElement) {
+//     if (!topBarElement) {
+//       console.error("The provided topBarElement is invalid.");
+//       return null;
+//     }
   
-//     // This method for finding the timer is robust and correct.
-//     const timerElement = Array.from(document.querySelectorAll('div[dir="auto"]'))
+//     // --- Find elements *within* the provided topBarElement ---
+  
+//     // Find the timer by its content (the ':').
+//     const timerElement = Array.from(topBarElement.querySelectorAll('div[dir="auto"]'))
 //                               .find(el => el.innerText.includes(':'));
   
-//     // --- New, More Accurate Logic for Game Name and Round ---
+//     // Find the 'eye' spectator icon to use as an anchor.
+//     const spectatorIcon = topBarElement.querySelector('svg[id*="spectator_icon_svg"]');
+    
+//     // The 'Round' element is the previous sibling of the spectator icon's container.
+//     const roundElement = spectatorIcon?.parentElement?.previousElementSibling;
+    
+//     // The 'Game Name' element is the first child of the Round element's parent container.
+//     const gameNameElement = roundElement?.parentElement?.firstElementChild;
   
-//     // Find the 'Round' text first.
-//     const roundElement = Array.from(document.querySelectorAll('div[dir="auto"]'))
-//                              .find(el => el.innerText.startsWith('Round '));
-    
-//     let gameNameElement = null;
-//     // Check if we found the round element before proceeding.
-//     if (roundElement) {
-//       // The parent container holds both the game name and the round info line.
-//       const parentContainer = roundElement.parentElement.parentElement;
-      
-//       // The game name div is the first child of this parent container.
-//       // The text of this element might be the game name or "Paused".
-//       gameNameElement = parentContainer.firstElementChild;
-//     }
-    
 //     const gameInfo = {
 //       timeRemaining: timerElement?.innerText.trim() || 'N/A',
-//       // We now correctly reference the gameNameElement found via hierarchy.
 //       gameName: gameNameElement?.innerText.trim() || 'N/A',
 //       round: roundElement?.innerText.trim() || 'N/A'
 //     };
@@ -32,6 +33,3 @@
 //     console.log("Parsed Top Bar Info:", gameInfo);
 //     return gameInfo;
 //   }
-  
-//   // To run, paste the code above into the console, then run this line:
-//   parseTopBar();

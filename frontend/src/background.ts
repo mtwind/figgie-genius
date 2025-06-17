@@ -3,9 +3,9 @@
 // This variable will hold the most recent game state.
 let latestGameState: unknown = null;
 
-const welcomePage = 'sidepanel-welcome.html';
-const mainPage = 'sidepanel-main.html';
-const figgieUrl = 'https://www.figgie.com/play';
+const welcomePage = "sidepanel-welcome.html";
+const mainPage = "sidepanel-main.html";
+const figgieUrl = "https://www.figgie.com/play";
 
 // Allow users to open the side panel by clicking the action toolbar icon
 chrome.sidePanel
@@ -23,7 +23,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, _info, tab) => {
   await chrome.sidePanel.setOptions({
     tabId,
     path: isFiggiePage ? mainPage : welcomePage,
-    enabled: true
+    enabled: true,
   });
 });
 
