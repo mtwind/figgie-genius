@@ -18,22 +18,11 @@ export interface PlayerData {
   cardChanges: { [key: string]: string };
 }
 
-// Enum-like constants for bid/offer types
-export const BidOfferType = {
-  BID: 1,
-  OFFER: 2,
-  BUY: 3,
-  SELL: 4,
-} as const;
-
-export type BidOfferTypeValue =
-  (typeof BidOfferType)[keyof typeof BidOfferType];
-
 export interface BidOfferData {
   player: { name: string; color: string };
   price: number;
   suit: string;
-  type: BidOfferTypeValue;
+  type: 1 | 2 | 3 | 4; // 1=BID, 2=OFFER, 3=BUY, 4=SELL
 }
 
 // Defines the shape for a single trade in the history
@@ -45,8 +34,8 @@ export interface TradeData {
 }
 
 export interface FullTrade {
-  bid: BidOfferData | null;
-  offer: BidOfferData | null;
+  buy: BidOfferData | null;
+  sell: BidOfferData | null;
   trade: TradeData | null;
 }
 

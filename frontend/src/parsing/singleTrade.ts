@@ -1,5 +1,5 @@
 // src/parsing/parseTradeHistory.ts
-import type { TradeData } from "@/types";
+import type { BidOfferData, FullTrade, TradeData } from "@/types";
 
 // FIX: Add a type for the helper function's parameter.
 const parseColorFromRgb = (rgbString: string | null | undefined): string => {
@@ -11,7 +11,7 @@ const parseColorFromRgb = (rgbString: string | null | undefined): string => {
   return "unknown";
 };
 
-export function parseSingleTrade(tradeRow: HTMLDivElement): TradeData | null {
+export function parseSingleTrade(tradeRow: HTMLDivElement): FullTrade | null {
   const columns = tradeRow.children;
   if (columns.length < 4) return null;
 
@@ -44,6 +44,20 @@ export function parseSingleTrade(tradeRow: HTMLDivElement): TradeData | null {
   // FIX: Assert the column as HTMLElement to access .innerText
   const price = (columns[3] as HTMLElement).innerText.trim() || "N/A";
 
+  const buy: BidOfferData = {
+    player: buyer,
+    price: parseInt(price),
+    suit: suit,
+    type: 3,
+  };
+
+  const sell: BidOfferData = {
+    player: seller,
+    price: parseInt(price),
+    suit: suit,
+    type: 4,
+  };
+
   const trade: TradeData = {
     buyer: buyer,
     suit: suit,
@@ -51,5 +65,11 @@ export function parseSingleTrade(tradeRow: HTMLDivElement): TradeData | null {
     price: price,
   };
 
-  return trade;
+  const full: FullTrade = {
+    buy: buy,
+    sell: sell,
+    trade: trade,
+  };
+
+  return full;
 }

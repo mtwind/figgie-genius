@@ -1,6 +1,6 @@
-import react from '@vitejs/plugin-react';
-import path, { resolve } from 'path'; // <-- Add this import
-import { defineConfig } from 'vite';
+import react from "@vitejs/plugin-react";
+import path, { resolve } from "path"; // <-- Add this import
+import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,17 +8,17 @@ export default defineConfig({
   // Add this 'resolve' section
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   build: {
     rollupOptions: {
       // Define multiple entry points for the build process
       input: {
-        'service-worker': resolve(__dirname, 'src/background.ts'),
-        'sidepanel-main': resolve(__dirname, 'sidepanel-main.html'),
-        'sidepanel-welcome': resolve(__dirname, 'sidepanel-welcome.html'),
-        'content': resolve(__dirname, 'src/content.ts') 
+        "service-worker": resolve(__dirname, "src/background.ts"),
+        "sidepanel-main": resolve(__dirname, "sidepanel-main.html"),
+        "sidepanel-welcome": resolve(__dirname, "sidepanel-welcome.html"),
+        content: resolve(__dirname, "src/content.ts"),
       },
       output: {
         entryFileNames: `[name].js`,
@@ -27,4 +27,4 @@ export default defineConfig({
       },
     },
   },
-})
+});

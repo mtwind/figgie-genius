@@ -1,6 +1,6 @@
 // src/content.ts
-import { getGameStateSnapshot } from "@/parsing/legacy/parsing";
-import { parseAll } from "./parsing/parseAll";
+// import { getGameStateSnapshot } from "@/parsing/legacy/parsing";
+import { parseAll } from "@/parsing/parseAll";
 
 // ... (keep your debounce function here) ...
 function debounce<T extends (...args: unknown[]) => void>(
@@ -17,10 +17,10 @@ function debounce<T extends (...args: unknown[]) => void>(
 }
 
 const handleNewTrade = () => {
-  const gameState = getGameStateSnapshot();
+  const gameState = parseAll();
+
   if (gameState) {
     // Send the new game state to the background script.
-    parseAll();
     chrome.runtime.sendMessage({
       type: "GAME_STATE_UPDATE",
       payload: gameState,

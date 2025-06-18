@@ -1,7 +1,6 @@
 // src/parsing/parseTradeRow.ts
 
 import type { BidOfferData } from "@/types";
-import { BidOfferType } from "@/types";
 
 // A helper function to parse a player's color from an rgb() string.
 const parseColorFromRgb = (rgbString: string | null | undefined): string => {
@@ -71,14 +70,14 @@ export function parseTradeRow(
 
   const buyerEvent: BidOfferData = {
     player: buyer,
-    type: BidOfferType.BUY,
+    type: 3,
     suit: suit,
     price: price,
   };
 
   const sellerEvent: BidOfferData = {
     player: seller,
-    type: BidOfferType.SELL,
+    type: 4,
     suit: suit,
     price: price,
   };

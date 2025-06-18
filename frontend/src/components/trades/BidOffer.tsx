@@ -2,7 +2,6 @@
 
 import { SuitIcon } from "@/components/SuitIcon";
 import type { BidOfferData } from "@/types";
-import { BidOfferType } from "@/types";
 import { Box, Paper, Typography } from "@mui/material";
 
 interface BidOfferProps {
@@ -37,8 +36,7 @@ export const BidOffer = ({ data }: BidOfferProps) => {
   };
 
   // Determine if this is a purchase or sale (more powerful colors)
-  const isPurchaseOrSale =
-    data.type === BidOfferType.BUY || data.type === BidOfferType.SELL;
+  const isPurchaseOrSale = data.type === 3 || data.type === 4;
 
   // Choose color map based on transaction type
   const colorMap = isPurchaseOrSale ? strongColorMap : mediumColorMap;
@@ -46,20 +44,19 @@ export const BidOffer = ({ data }: BidOfferProps) => {
 
   // Determine the action text and layout order based on the transaction type
   let actionText = "";
-  const isBidOffer =
-    data.type === BidOfferType.BID || data.type === BidOfferType.OFFER;
+  const isBidOffer = data.type === 1 || data.type === 2;
 
   switch (data.type) {
-    case BidOfferType.BID:
+    case 1:
       actionText = "BID";
       break;
-    case BidOfferType.OFFER:
+    case 2:
       actionText = "OFFERED";
       break;
-    case BidOfferType.BUY:
+    case 3:
       actionText = "BOUGHT";
       break;
-    case BidOfferType.SELL:
+    case 4:
       actionText = "SOLD";
       break;
   }

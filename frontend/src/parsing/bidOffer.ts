@@ -1,7 +1,6 @@
 // src/parsing/parseBidOffer.ts
 
 import type { BidOfferData } from "@/types";
-import { BidOfferType } from "@/types";
 
 /**
  * A helper function to parse a player's color from a background-image style.
@@ -64,7 +63,7 @@ export function parseBidOffer(
     if (bidPrice && bidColor !== "none") {
       const data: BidOfferData = {
         player: { name: "Unknown Player", color: bidColor }, // Name is not available in this context
-        type: BidOfferType.BID,
+        type: 1,
         suit: suit,
         price: parseInt(bidPrice, 10),
       };
@@ -84,7 +83,7 @@ export function parseBidOffer(
     if (offerPrice && offerColor !== "none") {
       const data: BidOfferData = {
         player: { name: "Unknown Player", color: offerColor }, // Name is not available in this context
-        type: BidOfferType.OFFER,
+        type: 2,
         suit: suit,
         price: parseInt(offerPrice, 10),
       };
