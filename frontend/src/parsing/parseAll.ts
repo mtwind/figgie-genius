@@ -26,6 +26,6 @@ export function parseAll() {
     trades: trades,
   };
 
-  console.log("All Data: ", AllData);
+  // console.log("All Data: ", AllData);
   return AllData;
 }

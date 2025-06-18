@@ -1,5 +1,13 @@
 // frontend/src/types.ts
 
+export interface Time {
+  timeRemaining: string | undefined;
+}
+
+export interface Players {
+  players: { [key: string]: string };
+}
+
 // Defines the shape of the game's top bar information
 export interface GameInfo {
   timeRemaining: string;
