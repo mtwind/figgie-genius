@@ -34,16 +34,13 @@ const GameDashboard = () => {
     // 2. Set up listeners for real-time updates from the background script
     const messageListener = (message: any) => {
       if (message.type === "PLAYERS_UPDATED") {
-        console.log("Dashboard received players: ", message.payload);
         setAllPlayers(message.payload);
       }
       if (message.type === "LOG_UPDATED") {
-        console.log("Dashboard received log: ", message.payload);
         setTradeLog(message.payload);
       }
 
       if (message.type === "MARKET_UPDATED") {
-        console.log("Dashboard received market: ", message.payload);
         setMarketHistory(message.payload);
       }
     };
@@ -54,11 +51,16 @@ const GameDashboard = () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
-
   const renderActiveComponent = () => {
     switch (selectedTab) {
       case 0:
-        return <Home allPlayers={allPlayers[0]} />;
+        return (
+          <Home
+            trade={tradeLog[0]}
+            allPlayers={allPlayers[0]}
+            marketHistory={marketHistory[0]}
+          />
+        );
       case 1:
         return <Genius />;
       case 2:
@@ -72,7 +74,13 @@ const GameDashboard = () => {
           />
         ); // Pass the tradeLog to the Logs tab
       default:
-        return <Home allPlayers={allPlayers[0]} />;
+        return (
+          <Home
+            trade={tradeLog[0]}
+            allPlayers={allPlayers[0]}
+            marketHistory={marketHistory[0]}
+          />
+        );
     }
   };
 

@@ -1,17 +1,19 @@
 // src/components/tabs/Home.tsx
 
-import { PlayerCard } from "@/components/PlayerCard";
-import type { AllPlayers } from "@/types";
+import { GameState } from "@/components/GameState";
+import type { AllPlayers, FullTrade, MarketHistory } from "@/types";
 import { Box, Typography } from "@mui/material";
 
-// FIX 1: The component's props interface now only accepts the 'players' array.
+// The component's props interface now accepts the full game state data
 interface HomeProps {
   allPlayers: AllPlayers;
+  marketHistory: MarketHistory;
+  trade: FullTrade;
 }
 
-const Home = ({ allPlayers }: HomeProps) => {
-  // FIX 2: The guard clause now correctly checks the 'players' prop.
-  if (!allPlayers.players || allPlayers.players.length === 0) {
+const Home = ({ allPlayers, marketHistory, trade }: HomeProps) => {
+  // Guard clause to check if we have player data
+  if (!allPlayers || !allPlayers.players || allPlayers.players.length === 0) {
     return (
       <Box sx={{ p: 2 }}>
         <Typography>Loading player data...</Typography>
@@ -20,27 +22,15 @@ const Home = ({ allPlayers }: HomeProps) => {
   }
 
   return (
-    // This Box uses the robust, size-agnostic CSS Grid layout you approved.
-    <Box
-      sx={{
-        display: "grid",
-        gap: "4px", // Minimal padding between cards
-        p: "4px", // Minimal padding around the grid
-
-        // Responsive columns that AVOID a 3-column layout
-        gridTemplateColumns: "1fr", // Default: 1 column
-        "@media (min-width: 380px)": {
-          gridTemplateColumns: "1fr 1fr", // At 380px+, switch to 2 columns
-        },
-        "@media (min-width: 780px)": {
-          gridTemplateColumns: "1fr 1fr 1fr 1fr", // At 780px+, switch to 4 columns
-        },
-      }}
-    >
-      {/* FIX 3: The map function now correctly iterates over the 'players' prop. */}
-      {allPlayers.players.map((player) => (
-        <PlayerCard key={player.name} player={player} />
-      ))}
+    <Box sx={{ p: 1 }}>
+      <Typography variant="h6" sx={{ p: 1, fontWeight: "bold" }}>
+        Current Game State
+      </Typography>
+      <GameState
+        allPlayers={allPlayers}
+        marketHistory={marketHistory}
+        trade={trade}
+      />
     </Box>
   );
 };

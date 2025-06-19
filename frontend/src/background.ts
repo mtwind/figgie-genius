@@ -35,7 +35,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     // This is the ONLY event we are handling for now.
     case "NEW_TRANSACTION_EVENT":
       console.log("Background received new transaction event.");
-      console.log("Payload: ", message.payload);
 
       // Update the state with the fresh data from the payload.
       playersLog.unshift(message.payload.allPlayers);

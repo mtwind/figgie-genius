@@ -88,7 +88,6 @@ function observeTradeHistory() {
     for (const mutation of mutationList) {
       // We only care about when new elements are added to the trade history list.
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-        // console.log("New Trade");
         debouncedHandleNewTrade();
       }
     }
