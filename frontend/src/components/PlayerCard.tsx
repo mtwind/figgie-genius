@@ -26,7 +26,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
     unknown: "#666",
   };
 
-  console.log(isUser);
+  console.log("isUser: ", isUser);
   const backgroundColor = colorMap[playerColor] || colorMap.unknown;
   return (
     <Paper

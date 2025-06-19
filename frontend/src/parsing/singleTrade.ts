@@ -1,4 +1,5 @@
 // src/parsing/parseTradeHistory.ts
+import { parseTime } from "@/parsing/time";
 import type { BidOfferData, FullTrade, TradeData } from "@/types";
 
 // FIX: Add a type for the helper function's parameter.
@@ -43,19 +44,22 @@ export function parseSingleTrade(tradeRow: HTMLDivElement): FullTrade | null {
 
   // FIX: Assert the column as HTMLElement to access .innerText
   const price = (columns[3] as HTMLElement).innerText.trim() || "N/A";
+  const time = parseTime();
 
   const buy: BidOfferData = {
     player: buyer,
     price: parseInt(price),
     suit: suit,
-    type: 3,
+    type: "BUY",
+    time: time?.timeRemaining,
   };
 
   const sell: BidOfferData = {
     player: seller,
     price: parseInt(price),
     suit: suit,
-    type: 4,
+    type: "SELL",
+    time: time?.timeRemaining,
   };
 
   const trade: TradeData = {
@@ -63,6 +67,7 @@ export function parseSingleTrade(tradeRow: HTMLDivElement): FullTrade | null {
     suit: suit,
     seller: seller,
     price: price,
+    time: time?.timeRemaining,
   };
 
   const full: FullTrade = {

@@ -1,33 +1,32 @@
-// src/components/tabs/Home.tsx
+// src/components/trades/PlayerSummaries.tsx
 
 import { PlayerCard } from "@/components/PlayerCard";
 import type { AllPlayers } from "@/types";
 import { Box, Typography } from "@mui/material";
 
-// FIX 1: The component's props interface now only accepts the 'players' array.
-interface HomeProps {
+interface PlayerSummariesProps {
   allPlayers: AllPlayers;
 }
 
-const Home = ({ allPlayers }: HomeProps) => {
-  // FIX 2: The guard clause now correctly checks the 'players' prop.
+export const PlayerSummaries = ({ allPlayers }: PlayerSummariesProps) => {
+  // Guard clause to handle empty or missing players
   if (!allPlayers.players || allPlayers.players.length === 0) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography>Loading player data...</Typography>
+        <Typography>No player data available</Typography>
       </Box>
     );
   }
 
   return (
-    // This Box uses the robust, size-agnostic CSS Grid layout you approved.
+    // Dynamic CSS Grid layout similar to Home.tsx
     <Box
       sx={{
         display: "grid",
         gap: "4px", // Minimal padding between cards
         p: "4px", // Minimal padding around the grid
 
-        // Responsive columns that AVOID a 3-column layout
+        // Responsive columns that avoid a 3-column layout
         gridTemplateColumns: "1fr", // Default: 1 column
         "@media (min-width: 380px)": {
           gridTemplateColumns: "1fr 1fr", // At 380px+, switch to 2 columns
@@ -37,12 +36,9 @@ const Home = ({ allPlayers }: HomeProps) => {
         },
       }}
     >
-      {/* FIX 3: The map function now correctly iterates over the 'players' prop. */}
       {allPlayers.players.map((player) => (
         <PlayerCard key={player.name} player={player} />
       ))}
     </Box>
   );
 };
-
-export default Home;

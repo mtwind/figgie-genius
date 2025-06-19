@@ -97,7 +97,7 @@ export function getMarkets(): Record<string, MarketData> | null {
   return marketData;
 }
 
-export function getTrades(): FullTrade[] | null | [] {
+export function getTrades(last: boolean = false): FullTrade[] | null | [] {
   const tradeHistoryHeader = Array.from(
     document.querySelectorAll('div[dir="auto"]')
   ).find((div) => (div as HTMLElement).innerText.trim() === "Trade History");
@@ -116,6 +116,9 @@ export function getTrades(): FullTrade[] | null | [] {
     const trade = parseSingleTrade(row as HTMLDivElement);
     if (trade) {
       trades.push(trade);
+    }
+    if (last) {
+      return trades;
     }
   });
 

@@ -4,7 +4,7 @@ export interface Time {
   timeRemaining: string | undefined;
 }
 
-export interface Players {
+export interface PlayerColors {
   players: { [key: string]: string };
 }
 
@@ -26,11 +26,20 @@ export interface PlayerData {
   cardChanges: { [key: string]: string };
 }
 
+export interface AllPlayers {
+  players: PlayerData[];
+}
+
+export interface MarketHistory {
+  market: BidOfferData[] | null;
+}
+
 export interface BidOfferData {
   player: { name: string; color: string };
   price: number;
   suit: string;
-  type: 1 | 2 | 3 | 4; // 1=BID, 2=OFFER, 3=BUY, 4=SELL
+  type: "BID" | "OFFER" | "BUY" | "SELL"; // 1=BID, 2=OFFER, 3=BUY, 4=SELL
+  time: string | undefined;
 }
 
 // Defines the shape for a single trade in the history
@@ -39,12 +48,13 @@ export interface TradeData {
   suit: string;
   seller: { name: string; color: string };
   price: string;
+  time: string | undefined;
 }
 
 export interface FullTrade {
   buy: BidOfferData | null;
   sell: BidOfferData | null;
-  trade: TradeData | null;
+  trade: TradeData | null | undefined;
 }
 
 // Defines the shape for a single market on the trade board

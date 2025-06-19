@@ -1,5 +1,6 @@
 // src/parsing/parseBidOffer.ts
 
+import { parseTime } from "@/parsing/time";
 import type { BidOfferData } from "@/types";
 
 /**
@@ -51,6 +52,8 @@ export function parseBidOffer(
   }
   if (suit === "Unknown") return null;
 
+  const time = parseTime();
+
   if (bid) {
     // --- Check for an active Bid on the Left Side ---
     const bidDisplay = bidSide.querySelector('div[style*="background-image"]');
@@ -63,9 +66,10 @@ export function parseBidOffer(
     if (bidPrice && bidColor !== "none") {
       const data: BidOfferData = {
         player: { name: "Unknown Player", color: bidColor }, // Name is not available in this context
-        type: 1,
+        type: "BID",
         suit: suit,
         price: parseInt(bidPrice, 10),
+        time: time?.timeRemaining,
       };
       return data;
     }
@@ -83,9 +87,10 @@ export function parseBidOffer(
     if (offerPrice && offerColor !== "none") {
       const data: BidOfferData = {
         player: { name: "Unknown Player", color: offerColor }, // Name is not available in this context
-        type: 2,
+        type: "OFFER",
         suit: suit,
         price: parseInt(offerPrice, 10),
+        time: time?.timeRemaining,
       };
       return data;
     }

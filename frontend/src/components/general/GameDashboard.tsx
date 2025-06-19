@@ -1,68 +1,78 @@
 // src/components/GameDashboard.tsx
 
-import DashboardHeader from "@/components/general/DashboardHeader";
-import { Box, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
-
-// Import the new interface and the view components
-// Import the new interface and the view components
 import Data from "@/components/tabs/data/Data";
 import Genius from "@/components/tabs/genius/Genius";
 import Home from "@/components/tabs/home/Home";
 import Logs from "@/components/tabs/logs/Logs";
-import type { FullGameState } from "@/types";
+import type { AllPlayers, FullTrade, MarketHistory } from "@/types";
+import { Box } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import DashboardHeader from "./DashboardHeader";
 
 const GameDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-  // FIX: Replace 'any' with the specific FullGameState interface.
-  const [gameState, setGameState] = useState<FullGameState | null>(null);
+  const [allPlayers, setAllPlayers] = useState<AllPlayers[]>([]);
+  const [tradeLog, setTradeLog] = useState<FullTrade[]>([]);
+  const [marketHistory, setMarketHistory] = useState<MarketHistory[]>([]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
 
   useEffect(() => {
-    const requestData = () => {
-      chrome.runtime.sendMessage({ type: "GET_LATEST_STATE" }, (response) => {
-        if (chrome.runtime.lastError) {
-          console.error(chrome.runtime.lastError.message);
-        } else {
-          setGameState(response);
-        }
-      });
-    };
+    // 1. Fetch the initial state when the panel opens
+    chrome.runtime.sendMessage({ type: "GET_LATEST_PLAYERS" }, (response) => {
+      if (response) setAllPlayers(response);
+    });
+    chrome.runtime.sendMessage({ type: "GET_TRADE_LOG" }, (response) => {
+      if (response) setTradeLog(response);
+    });
+    chrome.runtime.sendMessage({ type: "GET_MARKET_HISTORY" }, (response) => {
+      if (response) setMarketHistory(response);
+    });
 
-    requestData();
+    // 2. Set up listeners for real-time updates from the background script
+    const messageListener = (message: any) => {
+      if (message.type === "PLAYERS_UPDATED") {
+        console.log("Dashboard received players: ", message.payload);
+        setAllPlayers(message.payload);
+      }
+      if (message.type === "LOG_UPDATED") {
+        console.log("Dashboard received log: ", message.payload);
+        setTradeLog(message.payload);
+      }
 
-    // The listener now knows the message payload will be a FullGameState object
-    const messageListener = (message: {
-      type: string;
-      payload: FullGameState;
-    }) => {
-      if (message.type === "GAME_STATE_UPDATE") {
-        setGameState(message.payload);
+      if (message.type === "MARKET_UPDATED") {
+        console.log("Dashboard received market: ", message.payload);
+        setMarketHistory(message.payload);
       }
     };
     chrome.runtime.onMessage.addListener(messageListener);
 
+    // 3. Cleanup listener when the component unmounts
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
 
   const renderActiveComponent = () => {
-    // Pass the typed gameState prop down to the child components
     switch (selectedTab) {
       case 0:
-        return <Home gameState={gameState} />;
+        return <Home allPlayers={allPlayers[0]} />;
       case 1:
         return <Genius />;
       case 2:
         return <Data />;
       case 3:
-        return <Logs gameState={gameState} />;
+        return (
+          <Logs
+            tradeLog={tradeLog}
+            players={allPlayers}
+            market={marketHistory}
+          />
+        ); // Pass the tradeLog to the Logs tab
       default:
-        return <Home gameState={gameState} />;
+        return <Home allPlayers={allPlayers[0]} />;
     }
   };
 
@@ -81,11 +91,7 @@ const GameDashboard = () => {
         onTabChange={handleTabChange}
       />
       <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
-        {gameState ? (
-          renderActiveComponent()
-        ) : (
-          <Typography sx={{ p: 2 }}>Waiting for game data...</Typography>
-        )}
+        {renderActiveComponent()}
       </Box>
     </Box>
   );

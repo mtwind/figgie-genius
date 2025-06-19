@@ -1,5 +1,6 @@
 // src/parsing/parseTradeRow.ts
 
+import { parseTime } from "@/parsing/time";
 import type { BidOfferData } from "@/types";
 
 // A helper function to parse a player's color from an rgb() string.
@@ -27,6 +28,7 @@ export function parseTradeRow(
   //   console.error("Could not find the inner [aria-disabled='true'] row element.");
   //   return null;
   // }
+  console.log("TradeRowWrapper in func: ", tradeRowWrapper);
 
   const columns = tradeRowWrapper.children;
   if (columns.length < 4) {
@@ -65,21 +67,24 @@ export function parseTradeRow(
   };
 
   const price = parseInt((columns[3] as HTMLElement).innerText.trim(), 10) || 0;
+  const time = parseTime();
 
   // --- Create two separate data objects, conforming to the BidOfferData interface ---
 
   const buyerEvent: BidOfferData = {
     player: buyer,
-    type: 3,
+    type: "BUY",
     suit: suit,
     price: price,
+    time: time?.timeRemaining,
   };
 
   const sellerEvent: BidOfferData = {
     player: seller,
-    type: 4,
+    type: "SELL",
     suit: suit,
     price: price,
+    time: time?.timeRemaining,
   };
 
   const tradeData: BidOfferData[] = [buyerEvent, sellerEvent];

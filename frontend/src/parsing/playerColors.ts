@@ -1,4 +1,4 @@
-export function parsePlayers(): { [key: string]: string } | null {
+export function parsePlayerColors(): { [key: string]: string } | null {
   const players: { [key: string]: string } = {};
 
   const chipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');

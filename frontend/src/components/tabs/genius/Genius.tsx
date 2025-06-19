@@ -7,30 +7,34 @@ import { Box, Divider, Typography } from "@mui/material";
 // Create mock data for each transaction type
 const mockBid: BidOfferData = {
   player: { name: "Bot-Rabbit", color: "green" },
-  type: 1,
+  type: "BID",
   suit: "Spades",
   price: 12,
+  time: "1:03",
 };
 
 const mockOffer: BidOfferData = {
   player: { name: "Bot-Dinosaur", color: "red" },
-  type: 2,
+  type: "OFFER",
   suit: "Clubs",
   price: 15,
+  time: "1:03",
 };
 
 const mockBuy: BidOfferData = {
   player: { name: "mtwind2003", color: "blue" },
-  type: 3,
+  type: "BUY",
   suit: "Diamonds",
   price: 14,
+  time: "1:03",
 };
 
 const mockSell: BidOfferData = {
   player: { name: "Bot-Skunk", color: "orange" },
-  type: 4,
+  type: "SELL",
   suit: "Hearts",
   price: 10,
+  time: "1:03",
 };
 
 const Genius = () => {

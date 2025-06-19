@@ -36,7 +36,7 @@ export const BidOffer = ({ data }: BidOfferProps) => {
   };
 
   // Determine if this is a purchase or sale (more powerful colors)
-  const isPurchaseOrSale = data.type === 3 || data.type === 4;
+  const isPurchaseOrSale = data.type === "BUY" || data.type === "SELL";
 
   // Choose color map based on transaction type
   const colorMap = isPurchaseOrSale ? strongColorMap : mediumColorMap;
@@ -44,19 +44,19 @@ export const BidOffer = ({ data }: BidOfferProps) => {
 
   // Determine the action text and layout order based on the transaction type
   let actionText = "";
-  const isBidOffer = data.type === 1 || data.type === 2;
+  const isBidOffer = data.type === "BID" || data.type === "OFFER";
 
   switch (data.type) {
-    case 1:
+    case "BID":
       actionText = "BID";
       break;
-    case 2:
+    case "OFFER":
       actionText = "OFFERED";
       break;
-    case 3:
+    case "BUY":
       actionText = "BOUGHT";
       break;
-    case 4:
+    case "SELL":
       actionText = "SOLD";
       break;
   }
@@ -119,7 +119,3 @@ export const BidOffer = ({ data }: BidOfferProps) => {
     </Paper>
   );
 };
-
-/* 
-// excellent, now i want to update logs.tsx so that instead of just showing the entire gameState, it shows each bid/offer/purchase/sale in a BidOffer.tsx component. you wil have to update the content.js file to recognize any time a new bid, offer, or transaction is made. Then, you will have to send this to the UI and display it in the log
-*/
