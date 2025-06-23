@@ -4,7 +4,9 @@ import { parsePlayers } from "@/parsing/players";
 import { getTrades } from "@/parsing/wrappers";
 import { AllPlayers, MarketHistory } from "./types";
 
-// Debounce function to ensure we only fire once per trade event.
+// This variable will store the unique ID of the last processed trade.
+let lastProcessedTradeId: string | null = null;
+
 function debounce<T extends (...args: any[]) => void>(
   func: T,
   delay: number
@@ -18,43 +20,40 @@ function debounce<T extends (...args: any[]) => void>(
   };
 }
 
-// This is the single handler that runs when a new trade is detected.
 const handleNewTrade = () => {
-  // console.log("New trade detected. Fetching data...");
+  // --- FIX: Get ALL trades first to find the total count ---
+  const allTrades = getTrades(false);
+  if (!allTrades || allTrades.length === 0) {
+    return;
+  }
 
-  // 1. Get ONLY the most recent trade by calling the wrapper with 'true'.
-  const newTradeArray = getTrades(true);
+  const mostRecentTrade = allTrades[0].trade;
+  if (!mostRecentTrade) return;
 
-  // 2. Get the updated state of all players.
-  const allPlayers: AllPlayers = {
-    players: parsePlayers() ?? [],
-  };
+  // --- FIX: Create a more robust unique ID ---
+  // We now include the total number of trades (the length of the array) in the ID.
+  const currentTradeId = `${mostRecentTrade.buyer.name}-${mostRecentTrade.suit}-${mostRecentTrade.seller.name}-${mostRecentTrade.price}-${allTrades.length}`;
 
-  const marketHistory: MarketHistory = {
-    market:
-      newTradeArray && newTradeArray[0]
-        ? [newTradeArray[0].buy, newTradeArray[0].sell].filter(
-            (item): item is NonNullable<typeof item> => item !== null
-          )
-        : [],
-  };
+  // Only proceed if the trade ID is new.
+  if (currentTradeId !== lastProcessedTradeId) {
+    console.log(`New unique trade processed: ${currentTradeId}`);
+    lastProcessedTradeId = currentTradeId; // Update the last processed ID
 
-  if (
-    newTradeArray &&
-    newTradeArray.length > 0 &&
-    allPlayers.players &&
-    allPlayers.players.length > 0
-  ) {
-    console.log("NEW_TRANSACTION_EVENT: ", {
-      trade: newTradeArray[0],
-      allPlayers: allPlayers,
-      marketHistory: marketHistory,
-    });
-    // 3. Send the single new trade and the updated player list to the background.
+    const allPlayers: AllPlayers = {
+      players: parsePlayers() ?? [],
+    };
+
+    // We can derive the market events from the most recent trade.
+    const marketHistory: MarketHistory = {
+      market: [allTrades[0].buy, allTrades[0].sell].filter(
+        (item): item is NonNullable<typeof item> => item !== null
+      ),
+    };
+
     chrome.runtime.sendMessage({
       type: "NEW_TRANSACTION_EVENT",
       payload: {
-        trade: newTradeArray[0], // Send the first (and only) item in the array
+        trade: allTrades[0],
         allPlayers: allPlayers,
         marketHistory: marketHistory,
       },
@@ -62,7 +61,7 @@ const handleNewTrade = () => {
   }
 };
 
-const debouncedHandleNewTrade = debounce(handleNewTrade, 250);
+const debouncedHandleNewTrade = debounce(handleNewTrade, 150);
 
 function observeTradeHistory() {
   const tradeHistoryHeader = Array.from(
@@ -70,7 +69,6 @@ function observeTradeHistory() {
   ).find((div) => (div as HTMLElement).innerText.trim() === "Trade History");
 
   if (!tradeHistoryHeader) {
-    console.warn("Could not find 'Trade History' header. Retrying...");
     setTimeout(observeTradeHistory, 2000);
     return;
   }
@@ -79,14 +77,10 @@ function observeTradeHistory() {
     tradeHistoryHeader.parentElement?.parentElement?.querySelector(
       'div[class*="r-150rngu"]'
     );
-  if (!listContainer) {
-    console.error("Could not find trade list container to observe.");
-    return;
-  }
+  if (!listContainer) return;
 
   const callback = (mutationList: MutationRecord[]) => {
     for (const mutation of mutationList) {
-      // We only care about when new elements are added to the trade history list.
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         debouncedHandleNewTrade();
       }
@@ -98,5 +92,5 @@ function observeTradeHistory() {
   console.log("SUCCESS: Now observing the trade history for new trades.");
 }
 
-// Wait a moment for the page to be ready before setting up the observer.
+// Initial setup
 setTimeout(observeTradeHistory, 1500);
