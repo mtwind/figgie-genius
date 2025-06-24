@@ -2,7 +2,9 @@
 
 import { parseAll } from "@/parsing/parseAll";
 import { getTrades } from "@/parsing/wrappers";
+import { parseBidOffer } from "./parsing/bidOffer";
 import { FullGameState, MarketHistory } from "./types";
+import { findBidOfferContainer, findMarketContainer } from "./util/findMarket";
 
 // This variable will store the unique ID of the last processed trade.
 let lastProcessedTradeId: string | null = null;
@@ -65,6 +67,33 @@ const handleNewTrade = () => {
   }
 };
 
+function handleBidOfferChange(
+  marketContainer: HTMLDivElement,
+  suit: "spades" | "clubs" | "diamonds" | "hearts",
+  isBid: boolean
+): void {
+  try {
+    // Use existing parseBidOffer function to extract the data
+    const bidOfferData = parseBidOffer(marketContainer, isBid);
+
+    if (bidOfferData) {
+      const type = isBid ? "BID" : "OFFER";
+      console.log(`${type} change detected for ${suit}:`, bidOfferData);
+
+      // Send the bid/offer update to background
+      chrome.runtime.sendMessage({
+        type: "BID_OFFER_UPDATE",
+        payload: { bidOfferData },
+      });
+    }
+  } catch (error) {
+    console.error(
+      `Error parsing ${isBid ? "bid" : "offer"} for ${suit}:`,
+      error
+    );
+  }
+}
+
 const debouncedHandleNewTrade = debounce(handleNewTrade, 150);
 
 function observeTradeHistory() {
@@ -111,6 +140,61 @@ function observeTradeHistory() {
       gameState: initialGameState,
     },
   });
+
+  initializeBidOfferObservers();
+}
+
+function observeBidOfferChanges() {
+  const suits: ("spades" | "clubs" | "diamonds" | "hearts")[] = [
+    "spades",
+    "clubs",
+    "diamonds",
+    "hearts",
+  ];
+  const observers: MutationObserver[] = [];
+
+  suits.forEach((suit) => {
+    // Find the market container for this suit using existing function
+    const marketContainer = findMarketContainer(suit) as HTMLDivElement | null;
+    if (!marketContainer) {
+      console.log(`Could not find market container for ${suit}`);
+      return;
+    }
+
+    // Find bid and offer containers using existing function
+    const bidContainer = findBidOfferContainer(marketContainer, true); // true for bid
+    const offerContainer = findBidOfferContainer(marketContainer, false); // false for offer
+
+    // Create observer for bid container
+    if (bidContainer) {
+      const bidObserver = new MutationObserver(() => {
+        handleBidOfferChange(marketContainer, suit, true); // true for bid
+      });
+      bidObserver.observe(bidContainer, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+      observers.push(bidObserver);
+      console.log(`Observing ${suit} bid changes`);
+    }
+
+    // Create observer for offer container
+    if (offerContainer) {
+      const offerObserver = new MutationObserver(() => {
+        handleBidOfferChange(marketContainer, suit, false); // false for offer
+      });
+      offerObserver.observe(offerContainer, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+      observers.push(offerObserver);
+      console.log(`Observing ${suit} offer changes`);
+    }
+  });
+
+  return observers;
 }
 
 // Function to check if the game UI is still present
@@ -132,16 +216,48 @@ function checkGameUIPresence() {
   }
 }
 
-// Monitor for page changes/reloads by checking UI presence every 3 seconds
-const uiMonitorInterval = setInterval(checkGameUIPresence, 3000);
+// --- INITIALIZATION AND CLEANUP ---
 
-// Also check immediately when the script loads (in case of page reload)
-setTimeout(checkGameUIPresence, 500);
+function initializeAllObservers() {
+  console.log("Initializing content script observers...");
 
-// Clean up interval if the script is unloaded
-window.addEventListener("beforeunload", () => {
-  clearInterval(uiMonitorInterval);
-});
+  // Start the trade history observer (this will check if we're in game)
+  observeTradeHistory();
+}
 
-// Initial setup
-setTimeout(observeTradeHistory, 1500);
+function initializeBidOfferObservers() {
+  console.log("Game detected - initializing bid/offer observers...");
+
+  setTimeout(() => {
+    const bidOfferObservers = observeBidOfferChanges();
+    console.log(`Initialized ${bidOfferObservers.length} bid/offer observers`);
+  }, 1000); // Shorter delay since we know we're in game
+}
+
+function initializeUIMonitoring() {
+  console.log("Starting UI monitoring...");
+
+  // Start periodic UI presence checking
+  const uiMonitoringInterval = setInterval(checkGameUIPresence, 3000);
+
+  // Initial check after page load
+  setTimeout(checkGameUIPresence, 500);
+
+  // Cleanup on page unload
+  window.addEventListener("beforeunload", () => {
+    clearInterval(uiMonitoringInterval);
+    console.log("Content script: Cleaned up intervals before page unload");
+  });
+
+  return uiMonitoringInterval;
+}
+
+// --- MAIN INITIALIZATION ---
+
+// Initialize observers and monitoring
+setTimeout(() => {
+  initializeAllObservers();
+}, 1500);
+
+// Initialize UI monitoring
+initializeUIMonitoring();
