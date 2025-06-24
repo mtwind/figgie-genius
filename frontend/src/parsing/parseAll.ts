@@ -1,29 +1,25 @@
-import {
-  getMarkets,
-  getOpponentData,
-  getTopBarData,
-  getTrades,
-  getUserData,
-} from "@/parsing/wrappers";
+import { getMarkets, getTopBarData, getTrades } from "@/parsing/wrappers";
 import type {
+  AllPlayers,
   FullGameState,
   FullTrade,
   GameInfo,
-  MarketData,
-  PlayerData,
+  SuitData,
 } from "@/types";
+import { parsePlayers } from "./players";
 
 export function parseAll() {
   const gameInfo: GameInfo | null = getTopBarData();
-  const user: PlayerData | null = getUserData();
-  const opponents: PlayerData[] = getOpponentData();
-  const markets: Record<string, MarketData> | null = getMarkets();
+  const markets: Record<string, SuitData> | null = getMarkets();
   const trades: FullTrade[] = getTrades() ?? [];
+  const allPlayers: AllPlayers | null = parsePlayers();
+
   const AllData: FullGameState = {
     gameInfo: gameInfo,
-    players: [user, ...opponents].filter((p): p is PlayerData => p !== null),
-    markets: markets ? Object.values(markets) : [],
-    trades: trades,
+    players: allPlayers,
+    marketHistory: null,
+    suitData: markets,
+    trade: trades[0],
   };
 
   // console.log("All Data: ", AllData);

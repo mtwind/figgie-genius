@@ -1,14 +1,10 @@
 // src/background.ts
 
-import type { AllPlayers, FullTrade, MarketHistory } from "@/types";
+import type { FullGameState } from "@/types";
 
-// --- State Management ---
 // eslint-disable-next-line prefer-const
-let playersLog: AllPlayers[] = [];
-// eslint-disable-next-line prefer-const
-let tradeLog: FullTrade[] = []; // This will store a running log of completed trades.
-// eslint-disable-next-line prefer-const
-let marketLog: MarketHistory[] = [];
+let gameStateLog: FullGameState[] = [];
+let currentGameState: FullGameState | null = null;
 
 // Side panel setup logic remains the same...
 const welcomePage = "sidepanel-welcome.html";
@@ -32,44 +28,54 @@ chrome.tabs.onUpdated.addListener(async (tabId, _info, tab) => {
 // --- Message Handling ---
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   switch (message.type) {
-    // This is the ONLY event we are handling for now.
-    case "NEW_TRANSACTION_EVENT":
-      console.log("Background received new transaction event.");
+    case "INITIAL_GAME_STATE":
+      console.log("Background received initial game state:");
+      console.log(message.payload);
 
-      // Update the state with the fresh data from the payload.
-      playersLog.unshift(message.payload.allPlayers);
-      tradeLog.unshift(message.payload.trade);
-      marketLog.unshift(message.payload.marketHistory);
+      // Store the initial game state separately
+      currentGameState = message.payload.gameState;
 
-      console.log("Sending data to update UI: ", {
-        playersLog,
-        tradeLog,
-        marketLog,
+      console.log("Sending initial game state to update UI: ", currentGameState);
+      // Broadcast initial state to any open side panels.
+      chrome.runtime.sendMessage({
+        type: "INITIAL_GAME_STATE_UPDATED",
+        payload: currentGameState,
       });
+
+      break;
+
+    case "NEW_TRANSACTION_EVENT":
+      console.log("Background received new transaction event:");
+      console.log(message.payload);
+
+      // Update the current game state
+      currentGameState = message.payload.gameState;
+      // Add to trade log
+      gameStateLog.unshift(message.payload.gameState);
+
+      console.log("Sending data to update UI: ", { currentGameState, gameStateLog });
       // Broadcast updates to any open side panels.
       chrome.runtime.sendMessage({
-        type: "PLAYERS_UPDATED",
-        payload: playersLog,
+        type: "GAME_STATE_UPDATED",
+        payload: { currentGameState, gameStateLog },
       });
-      chrome.runtime.sendMessage({
-        type: "LOG_UPDATED",
-        payload: tradeLog,
-      });
-      chrome.runtime.sendMessage({
-        type: "MARKET_UPDATED",
-        payload: marketLog,
-      });
+
+      break;    // These handlers allow the side panel to get the initial data when it opens.
+    case "GET_LATEST_GAME_STATE":
+      sendResponse({ currentGameState, gameStateLog });
       break;
 
-    // These handlers allow the side panel to get the initial data when it opens.
-    case "GET_LATEST_PLAYERS":
-      sendResponse(playersLog);
+    case "CLEAR_GAME_DATA":
+      console.log("Clearing all game data due to page reload/navigation");
+      gameStateLog.length = 0; // Clear the array
+      currentGameState = null; // Clear current state
+      
+      // Notify UI components that data has been cleared
+      chrome.runtime.sendMessage({
+        type: "GAME_STATE_UPDATED",
+        payload: { currentGameState: null, gameStateLog: [] },
+      });
       break;
-    case "GET_TRADE_LOG":
-      sendResponse(tradeLog);
-      break;
-    case "GET_MARKET_HISTORY":
-      sendResponse(marketLog);
   }
   return true; // Keep the message channel open for async responses.
 });

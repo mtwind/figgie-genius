@@ -4,44 +4,39 @@ import Data from "@/components/tabs/data/Data";
 import Genius from "@/components/tabs/genius/Genius";
 import Home from "@/components/tabs/home/Home";
 import Logs from "@/components/tabs/logs/Logs";
-import type { AllPlayers, FullTrade, MarketHistory } from "@/types";
+import type { FullGameState } from "@/types";
 import { Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import DashboardHeader from "./DashboardHeader";
 
 const GameDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [allPlayers, setAllPlayers] = useState<AllPlayers[]>([]);
-  const [tradeLog, setTradeLog] = useState<FullTrade[]>([]);
-  const [marketHistory, setMarketHistory] = useState<MarketHistory[]>([]);
+  const [currentGameState, setCurrentGameState] = useState<FullGameState | null>(null);
+  const [gameStateLog, setGameStateLog] = useState<FullGameState[]>([]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
-
   useEffect(() => {
-    // 1. Fetch the initial state when the panel opens
-    chrome.runtime.sendMessage({ type: "GET_LATEST_PLAYERS" }, (response) => {
-      if (response) setAllPlayers(response);
-    });
-    chrome.runtime.sendMessage({ type: "GET_TRADE_LOG" }, (response) => {
-      if (response) setTradeLog(response);
-    });
-    chrome.runtime.sendMessage({ type: "GET_MARKET_HISTORY" }, (response) => {
-      if (response) setMarketHistory(response);
-    });
+    chrome.runtime.sendMessage(
+      { type: "GET_LATEST_GAME_STATE" },
+      (response) => {
+        if (response) {
+          setCurrentGameState(response.currentGameState);
+          setGameStateLog(response.gameStateLog);
+        }
+      }
+    );
 
     // 2. Set up listeners for real-time updates from the background script
     const messageListener = (message: any) => {
-      if (message.type === "PLAYERS_UPDATED") {
-        setAllPlayers(message.payload);
-      }
-      if (message.type === "LOG_UPDATED") {
-        setTradeLog(message.payload);
-      }
-
-      if (message.type === "MARKET_UPDATED") {
-        setMarketHistory(message.payload);
+      if (message.type === "INITIAL_GAME_STATE_UPDATED") {
+        console.log("Dashboard received initial state: ", message.payload);
+        setCurrentGameState(message.payload);
+      } else if (message.type === "GAME_STATE_UPDATED") {
+        console.log("Dashboard received update: ", message.payload);
+        setCurrentGameState(message.payload.currentGameState);
+        setGameStateLog(message.payload.gameStateLog);
       }
     };
     chrome.runtime.onMessage.addListener(messageListener);
@@ -50,37 +45,18 @@ const GameDashboard = () => {
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
-  }, []);
-  const renderActiveComponent = () => {
+  }, []);  const renderActiveComponent = () => {
     switch (selectedTab) {
       case 0:
-        return (
-          <Home
-            trade={tradeLog[0]}
-            allPlayers={allPlayers[0]}
-            marketHistory={marketHistory[0]}
-          />
-        );
+        return <Home gameState={currentGameState} />;
       case 1:
         return <Genius />;
       case 2:
         return <Data />;
       case 3:
-        return (
-          <Logs
-            tradeLog={tradeLog}
-            players={allPlayers}
-            market={marketHistory}
-          />
-        ); // Pass the tradeLog to the Logs tab
+        return <Logs gameStateLog={gameStateLog} />; // Pass the tradeLog to the Logs tab
       default:
-        return (
-          <Home
-            trade={tradeLog[0]}
-            allPlayers={allPlayers[0]}
-            marketHistory={marketHistory[0]}
-          />
-        );
+        return <Home gameState={currentGameState} />;
     }
   };
 

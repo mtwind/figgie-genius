@@ -3,7 +3,7 @@ import { parseOpponents } from "@/parsing/opponents";
 import { parseSingleTrade } from "@/parsing/singleTrade";
 import { parseTopBar } from "@/parsing/topBar";
 import { parseUser } from "@/parsing/user";
-import type { FullTrade, GameInfo, MarketData, PlayerData } from "@/types";
+import type { FullTrade, GameInfo, PlayerData, SuitData } from "@/types";
 
 /**
  * WRAPPER 1: Finds the top bar element and passes it to the parser.
@@ -65,7 +65,7 @@ export function getOpponentData(): PlayerData[] {
   return parseOpponents(opponentsWrapper as HTMLElement);
 }
 
-export function getMarkets(): Record<string, MarketData> | null {
+export function getMarkets(): Record<string, SuitData> | null {
   const userChipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');
   const userContainer = userChipIcon?.closest(
     'div[style*="background-color: rgb(255, 255, 255)"]'
@@ -79,10 +79,10 @@ export function getMarkets(): Record<string, MarketData> | null {
   }
 
   // Initialize an empty object to store market data by suit name
-  const marketData: Record<string, MarketData> = {};
+  const marketData: Record<string, SuitData> = {};
 
   for (const wrapper of Array.from(tradeBoardsContainer.children)) {
-    const market: MarketData | null = parseMarket(wrapper as HTMLDivElement);
+    const market: SuitData | null = parseMarket(wrapper as HTMLDivElement);
     if (
       market &&
       market.suit !== "Unknown" &&

@@ -3,7 +3,7 @@
 import { SuitIcon } from "@/components/SuitIcon";
 import { MarketList } from "@/components/trades/MarketList";
 import { PlayerSummaries } from "@/components/trades/PlayerSummaries";
-import type { AllPlayers, FullTrade, MarketHistory } from "@/types";
+import type { FullGameState } from "@/types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
@@ -15,16 +15,10 @@ import {
 } from "@mui/material";
 
 interface GameStateProps {
-  allPlayers: AllPlayers;
-  marketHistory: MarketHistory;
-  trade: FullTrade;
+  gameState: FullGameState;
 }
 
-export const GameState = ({
-  allPlayers,
-  marketHistory,
-  trade,
-}: GameStateProps) => {
+export const GameState = ({ gameState }: GameStateProps) => {
   const colorMap: { [key: string]: string } = {
     blue: "#2773de",
     green: "#1aa77b",
@@ -33,8 +27,12 @@ export const GameState = ({
     unknown: "#666",
   };
 
-  console.log("Players: ", allPlayers.players);
-  console.log("Market History: ", marketHistory.market);
+  const allPlayers = gameState.players;
+  const marketHistory = gameState.marketHistory;
+  const trade = gameState.trade;
+
+  // console.log("Players: ", allPlayers?.players);
+  // console.log("Market History: ", marketHistory.market);
 
   if (!trade.trade || !trade.buy || !trade.sell) {
     console.log("Error: Trade is not well defined.");
@@ -138,10 +136,10 @@ export const GameState = ({
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {/* Player Summaries Section */}
-          <PlayerSummaries allPlayers={allPlayers} />
+          {allPlayers && <PlayerSummaries allPlayers={allPlayers} />}
 
           {/* Market History Section */}
-          <MarketList marketHistory={marketHistory} />
+          {marketHistory && <MarketList marketHistory={marketHistory} />}
         </Box>
       </AccordionDetails>
     </Accordion>

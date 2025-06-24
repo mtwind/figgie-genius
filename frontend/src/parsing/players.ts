@@ -2,14 +2,14 @@
 
 import { parseOpponents } from "@/parsing/opponents";
 import { parseUser } from "@/parsing/user";
-import type { PlayerData } from "@/types";
+import type { AllPlayers, PlayerData } from "@/types";
 
 /**
  * A wrapper function that finds all player dashboards on the page
  * and calls the appropriate parsers.
  * @returns An array of PlayerData objects for all players in the game.
  */
-export function parsePlayers(): PlayerData[] | null {
+export function parsePlayers(): AllPlayers | null {
   // Find the user's container using our robust anchor
   const chipIcon = document.querySelector('svg[id*="chip_desktop_svg"]');
   const userContainer = chipIcon?.closest(
@@ -25,7 +25,7 @@ export function parsePlayers(): PlayerData[] | null {
   const opponentsWrapper = userContainer.nextElementSibling;
   if (!opponentsWrapper) {
     console.error("parsePlayers: Could not find opponents' wrapper.");
-    return [];
+    return null;
   }
 
   // Parse all players
@@ -33,5 +33,8 @@ export function parsePlayers(): PlayerData[] | null {
   const opponents = parseOpponents(opponentsWrapper);
 
   // Combine and return, filtering out any null user objects
-  return [user, ...opponents].filter((p): p is PlayerData => p !== null);
+  const allPlayers: AllPlayers = {
+    players: [user, ...opponents].filter((p): p is PlayerData => p !== null),
+  };
+  return allPlayers;
 }

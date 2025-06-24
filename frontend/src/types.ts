@@ -58,7 +58,7 @@ export interface FullTrade {
 }
 
 // Defines the shape for a single market on the trade board
-export interface MarketData {
+export interface SuitData {
   lastSale: string;
   bid: BidOfferData | null;
   offer: BidOfferData | null;
@@ -67,9 +67,10 @@ export interface MarketData {
 
 export interface FullGameState {
   gameInfo: GameInfo | null;
-  players: PlayerData[] | null;
-  markets: MarketData[];
-  trades: FullTrade[];
+  players: AllPlayers | null;
+  marketHistory: MarketHistory | null;
+  suitData: Record<string, SuitData> | null;
+  trade: FullTrade;
 }
 
 export interface MarketDataOld {
@@ -84,6 +85,6 @@ export interface MarketDataOld {
 export interface FullGameStateOld {
   gameInfo: GameInfo | null;
   players: PlayerData[];
-  markets: Record<string, MarketData>;
+  markets: Record<string, SuitData>;
   lastTrade: TradeData | null;
 }

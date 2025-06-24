@@ -1,7 +1,7 @@
 // src/parsing/fullMarket.ts
 
 import { parseBidOffer } from "@/parsing/bidOffer"; // Import your existing function
-import type { MarketData } from "@/types";
+import type { SuitData } from "@/types";
 
 /**
  * Parses a single suit's trade board element to extract the last sale, bid, and offer data.
@@ -10,7 +10,7 @@ import type { MarketData } from "@/types";
  */
 export function parseMarket(
   marketElementWrapper: HTMLDivElement
-): MarketData | null {
+): SuitData | null {
   // The actual row with the 3 columns is nested one level down.
   const marketElement = marketElementWrapper.firstElementChild;
   if (!marketElement || marketElement.children.length < 3) {
@@ -35,7 +35,7 @@ export function parseMarket(
     false
   );
 
-  const marketData: MarketData = {
+  const marketData: SuitData = {
     lastSale: lastSale.toString(),
     bid: bidData,
     offer: offerData,
