@@ -90,7 +90,8 @@ export const BidOffer = ({ data }: BidOfferProps) => {
         backgroundColor: backgroundColor,
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between", // Pushes elements to the edges
+        justifyContent: "space-between",
+        gap: 1, // Add gap between elements
       }}
     >
       {/* Left side: Player Name */}
@@ -103,7 +104,7 @@ export const BidOffer = ({ data }: BidOfferProps) => {
         {actionText}
       </Typography>
 
-      {/* Right side: Dynamically ordered elements */}
+      {/* Center-Right: Dynamically ordered elements */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         {/*
           This is the core logic:
@@ -116,6 +117,20 @@ export const BidOffer = ({ data }: BidOfferProps) => {
         </Typography>
         {isBidOffer ? SuitBlock : PriceBlock}
       </Box>
+
+      {/* Far Right: Time */}
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: "normal",
+          color: isPurchaseOrSale
+            ? "rgba(255, 255, 255, 0.8)"
+            : "rgba(0, 0, 0, 0.6)",
+          minWidth: "fit-content", // Prevents time from being compressed
+        }}
+      >
+        {data.time || "N/A"}
+      </Typography>
     </Paper>
   );
 };

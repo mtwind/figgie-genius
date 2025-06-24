@@ -9,6 +9,8 @@ import { findBidOfferContainer, findMarketContainer } from "./util/findMarket";
 // This variable will store the unique ID of the last processed trade.
 let lastProcessedTradeId: string | null = null;
 
+let currentMarketHistory: MarketHistory | null = { market: [] };
+
 function debounce<T extends (...args: any[]) => void>(
   func: T,
   delay: number
@@ -44,17 +46,33 @@ const handleNewTrade = () => {
     const fullGame = parseAll();
 
     // We can derive the market events from the most recent trade.
-    const marketHistory: MarketHistory = {
-      market: [allTrades[0].buy, allTrades[0].sell].filter(
-        (item): item is NonNullable<typeof item> => item !== null
-      ),
-    };
+    // const marketHistory: MarketHistory = {
+    //   market: [allTrades[0].buy, allTrades[0].sell].filter(
+    //     (item): item is NonNullable<typeof item> => item !== null
+    //   ),
+    // };
+
+    const buy = allTrades[0].buy;
+    const sell = allTrades[0].sell;
+
+    if (buy && sell) {
+      if (currentMarketHistory && currentMarketHistory.market) {
+        currentMarketHistory.market.unshift(buy);
+        currentMarketHistory.market.unshift(sell);
+      } else if (currentMarketHistory) {
+        currentMarketHistory.market = [buy, sell];
+      } else {
+        currentMarketHistory = {
+          market: [buy, sell],
+        };
+      }
+    }
 
     const gameState: FullGameState = {
       gameInfo: fullGame.gameInfo,
       trade: fullGame.trade,
       players: fullGame.players,
-      marketHistory: marketHistory,
+      marketHistory: currentMarketHistory,
       suitData: fullGame.suitData,
     };
 
@@ -64,6 +82,10 @@ const handleNewTrade = () => {
       type: "NEW_TRANSACTION_EVENT",
       payload: { gameState },
     });
+
+    if (currentMarketHistory) {
+      currentMarketHistory.market = [];
+    }
   }
 };
 
@@ -75,6 +97,18 @@ function handleBidOfferChange(
   try {
     // Use existing parseBidOffer function to extract the data
     const bidOfferData = parseBidOffer(marketContainer, isBid);
+
+    if (bidOfferData) {
+      if (currentMarketHistory && currentMarketHistory.market) {
+        currentMarketHistory.market.unshift(bidOfferData);
+      } else if (currentMarketHistory) {
+        currentMarketHistory.market = [bidOfferData];
+      } else {
+        currentMarketHistory = {
+          market: [bidOfferData],
+        };
+      }
+    }
 
     if (bidOfferData) {
       const type = isBid ? "BID" : "OFFER";

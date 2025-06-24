@@ -4,7 +4,7 @@ import Data from "@/components/tabs/data/Data";
 import Genius from "@/components/tabs/genius/Genius";
 import Home from "@/components/tabs/home/Home";
 import Logs from "@/components/tabs/logs/Logs";
-import type { FullGameState } from "@/types";
+import { BidOfferData, type FullGameState } from "@/types";
 import { Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import DashboardHeader from "./DashboardHeader";
@@ -14,6 +14,7 @@ const GameDashboard = () => {
   const [currentGameState, setCurrentGameState] =
     useState<FullGameState | null>(null);
   const [gameStateLog, setGameStateLog] = useState<FullGameState[]>([]);
+  const [marketLog, setMarketLog] = useState<BidOfferData[]>([]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -38,6 +39,9 @@ const GameDashboard = () => {
         console.log("Dashboard received update: ", message.payload);
         setCurrentGameState(message.payload.currentGameState);
         setGameStateLog(message.payload.gameStateLog);
+        setMarketLog(message.payload.marketLog);
+      } else if (message.type === "BID_OFFER_UPDATE") {
+        setMarketLog(message.payload.marketLog);
       }
     };
     chrome.runtime.onMessage.addListener(messageListener);
@@ -54,7 +58,7 @@ const GameDashboard = () => {
       case 1:
         return <Genius />;
       case 2:
-        return <Data />;
+        return <Data marketLog={marketLog} />;
       case 3:
         return <Logs gameStateLog={gameStateLog} />; // Pass the tradeLog to the Logs tab
       default:

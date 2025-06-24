@@ -2,6 +2,7 @@
 
 import { parseTime } from "@/parsing/time";
 import type { BidOfferData } from "@/types";
+import { parsePlayerColors } from "./playerColors";
 
 /**
  * A helper function to parse a player's color from a background-image style.
@@ -28,6 +29,8 @@ export function parseBidOffer(
   suitRowWrapper: HTMLDivElement,
   bid: boolean
 ): BidOfferData | null {
+  const colorMap = parsePlayerColors();
+
   // The actual row with 3 columns is nested one level down inside the wrapper.
   const suitRow = suitRowWrapper.firstElementChild;
 
@@ -63,9 +66,11 @@ export function parseBidOffer(
     const bidPrice = bidPriceElement?.innerText.trim();
     const bidColor = parseColorFromStyle(bidDisplay);
 
+    const name = colorMap ? colorMap[bidColor] : "Unknown Player";
+
     if (bidPrice && bidColor !== "none") {
       const data: BidOfferData = {
-        player: { name: "Unknown Player", color: bidColor }, // Name is not available in this context
+        player: { name: name, color: bidColor }, // Name is not available in this context
         type: "BID",
         suit: suit,
         price: parseInt(bidPrice, 10),
@@ -84,9 +89,11 @@ export function parseBidOffer(
     const offerPrice = offerPriceElement?.innerText.trim();
     const offerColor = parseColorFromStyle(offerDisplay);
 
+    const name = colorMap ? colorMap[offerColor] : "Unknown Player";
+
     if (offerPrice && offerColor !== "none") {
       const data: BidOfferData = {
-        player: { name: "Unknown Player", color: offerColor }, // Name is not available in this context
+        player: { name: name, color: offerColor }, // Name is not available in this context
         type: "OFFER",
         suit: suit,
         price: parseInt(offerPrice, 10),
