@@ -78,29 +78,47 @@ const Home = ({ gameState }: HomeProps) => {
 
             {/* Show game info if available */}
             {gameState.gameInfo && (
-              <Box sx={{ mt: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+              <Box
+                sx={{
+                  mt: 3,
+                  p: 2,
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
                   Game Information
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    flexWrap: "wrap",
+                    gap: 1,
+                  }}
+                >
                   {gameState.gameInfo.gameName && (
-                    <Chip 
-                      label={gameState.gameInfo.gameName} 
-                      size="small" 
+                    <Chip
+                      label={gameState.gameInfo.gameName}
+                      size="small"
                       color="secondary"
                     />
                   )}
                   {gameState.gameInfo.round && (
-                    <Chip 
-                      label={gameState.gameInfo.round} 
-                      size="small" 
+                    <Chip
+                      label={gameState.gameInfo.round}
+                      size="small"
                       color="secondary"
                     />
                   )}
                   {gameState.gameInfo.timeRemaining && (
-                    <Chip 
-                      label={`Time: ${gameState.gameInfo.timeRemaining}`} 
-                      size="small" 
+                    <Chip
+                      label={`Time: ${gameState.gameInfo.timeRemaining}`}
+                      size="small"
                       color="secondary"
                     />
                   )}

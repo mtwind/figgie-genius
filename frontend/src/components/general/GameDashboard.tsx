@@ -11,7 +11,8 @@ import DashboardHeader from "./DashboardHeader";
 
 const GameDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [currentGameState, setCurrentGameState] = useState<FullGameState | null>(null);
+  const [currentGameState, setCurrentGameState] =
+    useState<FullGameState | null>(null);
   const [gameStateLog, setGameStateLog] = useState<FullGameState[]>([]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -45,7 +46,8 @@ const GameDashboard = () => {
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };
-  }, []);  const renderActiveComponent = () => {
+  }, []);
+  const renderActiveComponent = () => {
     switch (selectedTab) {
       case 0:
         return <Home gameState={currentGameState} />;

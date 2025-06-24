@@ -35,7 +35,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       // Store the initial game state separately
       currentGameState = message.payload.gameState;
 
-      console.log("Sending initial game state to update UI: ", currentGameState);
+      console.log(
+        "Sending initial game state to update UI: ",
+        currentGameState
+      );
       // Broadcast initial state to any open side panels.
       chrome.runtime.sendMessage({
         type: "INITIAL_GAME_STATE_UPDATED",
@@ -53,14 +56,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       // Add to trade log
       gameStateLog.unshift(message.payload.gameState);
 
-      console.log("Sending data to update UI: ", { currentGameState, gameStateLog });
+      console.log("Sending data to update UI: ", {
+        currentGameState,
+        gameStateLog,
+      });
       // Broadcast updates to any open side panels.
       chrome.runtime.sendMessage({
         type: "GAME_STATE_UPDATED",
         payload: { currentGameState, gameStateLog },
       });
 
-      break;    // These handlers allow the side panel to get the initial data when it opens.
+      break; // These handlers allow the side panel to get the initial data when it opens.
     case "GET_LATEST_GAME_STATE":
       sendResponse({ currentGameState, gameStateLog });
       break;
@@ -69,7 +75,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       console.log("Clearing all game data due to page reload/navigation");
       gameStateLog.length = 0; // Clear the array
       currentGameState = null; // Clear current state
-      
+
       // Notify UI components that data has been cleared
       chrome.runtime.sendMessage({
         type: "GAME_STATE_UPDATED",

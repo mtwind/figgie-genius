@@ -93,7 +93,7 @@ function observeTradeHistory() {
   const observer = new MutationObserver(callback);
   observer.observe(listContainer, { childList: true, subtree: true });
   console.log("SUCCESS: Now observing the trade history for new trades.");
-  
+
   // Send initial game state with only players and game info
   const fullGame = parseAll();
   const initialGameState: FullGameState = {
