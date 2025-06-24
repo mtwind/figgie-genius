@@ -34,8 +34,8 @@ const DashboardHeader = ({
         >
           <Tab icon={<LocationOnIcon />} label="Home" />
           <Tab icon={<TipsAndUpdatesIcon />} label="Genius" />
-          <Tab icon={<BookmarkBorderIcon />} label="Data" />
-          <Tab icon={<NotificationsNoneIcon />} label="Logs" />
+          <Tab icon={<BookmarkBorderIcon />} label="Market" />
+          <Tab icon={<NotificationsNoneIcon />} label="Trades" />
         </Tabs>
       </AppBar>
     </Box>
