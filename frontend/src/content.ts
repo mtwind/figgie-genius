@@ -11,6 +11,9 @@ let lastProcessedTradeId: string | null = null;
 
 let currentMarketHistory: MarketHistory | null = { market: [] };
 
+// Add a flag to control observer operations
+let isGamePaused = false;
+
 function debounce<T extends (...args: any[]) => void>(
   func: T,
   delay: number
@@ -25,6 +28,11 @@ function debounce<T extends (...args: any[]) => void>(
 }
 
 const handleNewTrade = () => {
+  if (isGamePaused) {
+    console.log("Game is paused - skipping trade processing");
+    return;
+  }
+
   // --- FIX: Get ALL trades first to find the total count ---
   const allTrades = getTrades(false);
   if (!allTrades || allTrades.length === 0) {
@@ -40,7 +48,6 @@ const handleNewTrade = () => {
 
   // Only proceed if the trade ID is new.
   if (currentTradeId !== lastProcessedTradeId) {
-    console.log(`New unique trade processed: ${currentTradeId}`);
     lastProcessedTradeId = currentTradeId; // Update the last processed ID
 
     const fullGame = parseAll();
@@ -76,8 +83,6 @@ const handleNewTrade = () => {
       suitData: fullGame.suitData,
     };
 
-    console.log("Game state for ", lastProcessedTradeId, ": ", gameState);
-
     chrome.runtime.sendMessage({
       type: "NEW_TRANSACTION_EVENT",
       payload: { gameState },
@@ -94,6 +99,11 @@ function handleBidOfferChange(
   suit: "spades" | "clubs" | "diamonds" | "hearts",
   isBid: boolean
 ): void {
+  if (isGamePaused) {
+    console.log("Game is paused - skipping bid/offer processing");
+    return;
+  }
+
   try {
     // Use existing parseBidOffer function to extract the data
     const bidOfferData = parseBidOffer(marketContainer, isBid);
@@ -111,9 +121,6 @@ function handleBidOfferChange(
     }
 
     if (bidOfferData) {
-      const type = isBid ? "BID" : "OFFER";
-      console.log(`${type} change detected for ${suit}:`, bidOfferData);
-
       // Send the bid/offer update to background
       chrome.runtime.sendMessage({
         type: "BID_OFFER_UPDATE",
@@ -125,6 +132,84 @@ function handleBidOfferChange(
       `Error parsing ${isBid ? "bid" : "offer"} for ${suit}:`,
       error
     );
+  }
+}
+
+function observeGameName() {
+  // Find the top bar element first
+  const topBarElement = document.querySelector(
+    'div[style*="background-color: rgb(128, 74, 153)"]'
+  ) as HTMLElement;
+
+  if (!topBarElement) {
+    console.log(
+      "Top bar element not found. Retrying game name observer in 2 seconds..."
+    );
+    setTimeout(observeGameName, 2000);
+    return;
+  }
+
+  const spectatorIcon = topBarElement.querySelector(
+    'svg[id*="spectator_icon_svg"]'
+  );
+
+  // The 'Round' element is the previous sibling of the spectator icon's container.
+  const roundElement = spectatorIcon?.parentElement
+    ?.previousElementSibling as HTMLElement | null;
+
+  // The 'Game Name' element is the previous sibling of the round element (they're both children of the same container)
+  const gameNameElement = roundElement?.parentElement
+    ?.previousElementSibling as HTMLElement | null;
+
+  if (!gameNameElement) {
+    console.log("Game name element not found. Retrying in 2 seconds...");
+    setTimeout(observeGameName, 2000);
+    return;
+  }
+
+  console.log("SUCCESS: Now observing game name for pause status.");
+
+  // Create observer for the game name element
+  const gameNameObserver = new MutationObserver(() => {
+    handleGameNameChange(gameNameElement);
+  });
+
+  gameNameObserver.observe(gameNameElement, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+
+  // Initial check
+  handleGameNameChange(gameNameElement);
+
+  return gameNameObserver;
+}
+
+function handleGameNameChange(gameNameElement: HTMLElement): void {
+  const gameNameText = gameNameElement.innerText.trim();
+  const wasGamePaused = isGamePaused;
+
+  // Update pause status
+  isGamePaused = gameNameText === "Paused";
+
+  // Log status changes and send updates to background
+  if (isGamePaused && !wasGamePaused) {
+    console.log("Game PAUSED - All observers suspended");
+
+    // Send pause notification to background
+    chrome.runtime.sendMessage({
+      type: "GAME_PAUSED",
+      payload: { paused: true },
+    });
+  } else if (!isGamePaused && wasGamePaused) {
+    console.log("Game RESUMED - All observers active");
+
+    // Send resume notification to background
+    chrome.runtime.sendMessage({
+      type: "GAME_RESUMED",
+      payload: { paused: false },
+    });
   }
 }
 
@@ -166,7 +251,6 @@ function observeTradeHistory() {
     marketHistory: { market: [] },
     suitData: {},
   };
-  console.log("Sending initial game state:", initialGameState);
 
   chrome.runtime.sendMessage({
     type: "INITIAL_GAME_STATE",
@@ -210,7 +294,6 @@ function observeBidOfferChanges() {
         characterData: true,
       });
       observers.push(bidObserver);
-      console.log(`Observing ${suit} bid changes`);
     }
 
     // Create observer for offer container
@@ -224,7 +307,6 @@ function observeBidOfferChanges() {
         characterData: true,
       });
       observers.push(offerObserver);
-      console.log(`Observing ${suit} offer changes`);
     }
   });
 
@@ -242,6 +324,9 @@ function checkGameUIPresence() {
     // Game UI is not present, reset all data
     console.log("Game UI not detected, resetting data...");
     lastProcessedTradeId = null;
+    if (currentMarketHistory) {
+      currentMarketHistory.market = [];
+    }
 
     // Send a message to background to clear the stored data
     chrome.runtime.sendMessage({
@@ -255,12 +340,18 @@ function checkGameUIPresence() {
 function initializeAllObservers() {
   console.log("Initializing content script observers...");
 
+  // Start the game name observer first
+  observeGameName();
+
   // Start the trade history observer (this will check if we're in game)
   observeTradeHistory();
 }
 
 function initializeBidOfferObservers() {
-  console.log("Game detected - initializing bid/offer observers...");
+  if (isGamePaused) {
+    console.log("Game is paused - skipping bid/offer observer initialization");
+    return;
+  }
 
   setTimeout(() => {
     const bidOfferObservers = observeBidOfferChanges();

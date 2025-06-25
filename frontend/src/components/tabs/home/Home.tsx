@@ -1,12 +1,11 @@
 // src/components/tabs/Home.tsx
 
-import { GameState } from "@/components/GameState";
+import { EssentialData } from "@/components/EssentialData";
+import { SuitIcon } from "@/components/SuitIcon";
 import { PlayerSummaries } from "@/components/trades/PlayerSummaries";
 import type { FullGameState } from "@/types";
-import {
-  TrendingUp as TradingIcon,
-  HourglassEmpty as WaitingIcon,
-} from "@mui/icons-material";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import TradingViewIcon from "@mui/icons-material/TrendingUp";
 import {
   Box,
   Card,
@@ -30,120 +29,235 @@ const Home = ({ gameState }: HomeProps) => {
     return (
       <Box
         sx={{
-          p: 3,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           minHeight: "300px",
+          gap: 2,
         }}
       >
         <Paper
-          elevation={3}
+          elevation={2}
           sx={{
-            p: 4,
-            textAlign: "center",
-            backgroundColor: "#f5f5f5",
+            p: 3,
             borderRadius: 3,
-            maxWidth: 400,
+            textAlign: "center",
+            backgroundColor: "#f8f9fa",
+            minWidth: "250px",
           }}
         >
-          <CircularProgress size={48} sx={{ mb: 3, color: "#666" }} />
-          <Typography variant="h6" sx={{ mb: 2, color: "#666" }}>
+          <CircularProgress size={40} sx={{ mb: 2, color: "#1976d2" }} />
+          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
             Waiting for Game
           </Typography>
-          <Typography variant="body2" sx={{ color: "#999" }}>
-            Navigate to figgie.com and start playing to see live game data
+          <Typography variant="body2" color="text.secondary">
+            Please navigate to figgie.com and join a game
           </Typography>
         </Paper>
       </Box>
     );
   }
+
   // State 2: Game loaded but no trades yet
   if (!gameState.trade?.trade && gameState.players?.players) {
     return (
       <Box sx={{ p: 2 }}>
-        <Card elevation={2} sx={{ mb: 2 }}>
-          <CardContent sx={{ textAlign: "center", py: 4 }}>
-            <WaitingIcon sx={{ fontSize: 48, color: "#4CAF50", mb: 2 }} />
-            <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+        <Card
+          elevation={3}
+          sx={{
+            borderRadius: 3,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            mb: 2,
+          }}
+        >
+          <CardContent sx={{ textAlign: "center" }}>
+            <HourglassEmptyIcon sx={{ fontSize: 40, mb: 1 }} />
+            <Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 }}>
               Game Ready
             </Typography>
-            <Chip
-              label="Waiting for first trade..."
-              color="primary"
-              variant="outlined"
-              sx={{ mb: 3 }}
-            />
-
-            {/* Show game info if available */}
-            {gameState.gameInfo && (
-              <Box
-                sx={{
-                  mt: 3,
-                  p: 2,
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
-                >
-                  Game Information
-                </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-around",
-                    flexWrap: "wrap",
-                    gap: 1,
-                  }}
-                >
-                  {gameState.gameInfo.gameName && (
-                    <Chip
-                      label={gameState.gameInfo.gameName}
-                      size="small"
-                      color="secondary"
-                    />
-                  )}
-                  {gameState.gameInfo.round && (
-                    <Chip
-                      label={gameState.gameInfo.round}
-                      size="small"
-                      color="secondary"
-                    />
-                  )}
-                  {gameState.gameInfo.timeRemaining && (
-                    <Chip
-                      label={`Time: ${gameState.gameInfo.timeRemaining}`}
-                      size="small"
-                      color="secondary"
-                    />
-                  )}
-                </Box>
-              </Box>
-            )}
-
-            <PlayerSummaries allPlayers={gameState.players} />
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+              {gameState.players.players.length} players connected
+            </Typography>
           </CardContent>
         </Card>
+
+        {/* Game Info */}
+        {gameState.gameInfo && (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
+            {gameState.gameInfo.gameName && (
+              <Chip
+                label={gameState.gameInfo.gameName}
+                variant="outlined"
+                size="small"
+              />
+            )}
+            {gameState.gameInfo.round && (
+              <Chip
+                label={gameState.gameInfo.round}
+                variant="outlined"
+                size="small"
+              />
+            )}
+            {gameState.gameInfo.timeRemaining && (
+              <Chip
+                label={`⏱️ ${gameState.gameInfo.timeRemaining}`}
+                variant="outlined"
+                size="small"
+              />
+            )}
+          </Box>
+        )}
+
+        {/* Waiting Status */}
+        <Chip
+          label="Waiting for first trade..."
+          color="warning"
+          size="small"
+          sx={{ mb: 2 }}
+        />
+
+        {/* Player Summaries */}
+        <PlayerSummaries allPlayers={gameState.players} />
       </Box>
     );
   }
 
-  // State 3: Active game with trades (existing functionality)
+  // State 3: Active game (with trades) - Custom UI similar to GameState
+  const colorMap: { [key: string]: string } = {
+    blue: "#2773de",
+    green: "#1aa77b",
+    red: "#ef4043",
+    orange: "#efa823",
+    unknown: "#666",
+  };
+
+  const trade = gameState.trade;
+  const buyerColor = colorMap[trade.buy?.player.color || "unknown"];
+  const sellerColor = colorMap[trade.sell?.player.color || "unknown"];
+
+  // Define the visual blocks for the trade
+  const PriceBlock = (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+      <Typography variant="body1" sx={{ fontWeight: "bold", color: "white" }}>
+        {trade.trade?.price}
+      </Typography>
+      <Box
+        component="img"
+        src="chips.png"
+        alt="chips"
+        sx={{ width: 18, height: 18, p: 0.25 }}
+      />
+    </Box>
+  );
+
+  const SuitBlock = (
+    <Box sx={{ p: 0.25 }}>
+      <SuitIcon
+        suit={trade.trade?.suit || "Spades"}
+        size={{ width: "30px", height: "30px" }}
+      />
+    </Box>
+  );
+
   return (
-    <Box sx={{ p: 1 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, mb: 1 }}>
-        <TradingIcon sx={{ color: "#4CAF50" }} />
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+    <Box sx={{ p: 2 }}>
+      {/* Header with Live Game State */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mb: 2,
+          p: 1.5,
+          backgroundColor: "#f8f9fa",
+          borderRadius: 2,
+        }}
+      >
+        <TradingViewIcon sx={{ color: "#1976d2" }} />
+        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#333" }}>
           Live Game State
         </Typography>
-        <Chip label="Active" color="success" size="small" sx={{ ml: "auto" }} />
+        <Chip label="Active" color="success" size="small" />
       </Box>
-      <GameState gameState={gameState} />
+
+      {/* Latest Trade Display */}
+      {trade.trade && (
+        <Paper
+          elevation={2}
+          sx={{
+            borderRadius: 2,
+            display: "flex",
+            alignItems: "stretch",
+            overflow: "hidden",
+            mb: 2,
+          }}
+        >
+          {/* Left Half: Buyer's side */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.25,
+              backgroundColor: buyerColor,
+              px: 1,
+              py: 1,
+              justifyContent: "flex-end",
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "bold", color: "white" }}
+            >
+              {trade.trade.buyer.name} BOUGHT
+            </Typography>
+            {SuitBlock}
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "bold", color: "white" }}
+            >
+              for
+            </Typography>
+          </Box>
+
+          {/* Right Half: Seller's side */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.25,
+              backgroundColor: sellerColor,
+              px: 1,
+              py: 1,
+              justifyContent: "flex-start",
+            }}
+          >
+            {PriceBlock}
+            <Typography
+              variant="body2"
+              sx={{ ml: 0.5, fontWeight: "bold", color: "white" }}
+            >
+              from {trade.trade.seller.name}
+            </Typography>
+          </Box>
+        </Paper>
+      )}
+
+      {/* Essential Data Section */}
+      <EssentialData
+        fairPrices={[12.0, 12.0, 12.0, 12.0]}
+        goalChances={[25.0, 25.0, 25.0, 25.0]}
+      />
+
+      {/* Player Summaries Section */}
+      {gameState.players && (
+        <Box sx={{ mt: 2 }}>
+          <PlayerSummaries allPlayers={gameState.players} />
+        </Box>
+      )}
     </Box>
   );
 };

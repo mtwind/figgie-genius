@@ -1,5 +1,6 @@
 // src/components/GameState.tsx
 
+import { EssentialData } from "@/components/EssentialData";
 import { SuitIcon } from "@/components/SuitIcon";
 import { MarketList } from "@/components/trades/MarketList";
 import { PlayerSummaries } from "@/components/trades/PlayerSummaries";
@@ -16,9 +17,15 @@ import {
 
 interface GameStateProps {
   gameState: FullGameState;
+  fairPrices?: [number, number, number, number]; // Optional for now
+  goalChances?: [number, number, number, number]; // Optional for now
 }
 
-export const GameState = ({ gameState }: GameStateProps) => {
+export const GameState = ({
+  gameState,
+  fairPrices,
+  goalChances,
+}: GameStateProps) => {
   const colorMap: { [key: string]: string } = {
     blue: "#2773de",
     green: "#1aa77b",
@@ -31,8 +38,13 @@ export const GameState = ({ gameState }: GameStateProps) => {
   const marketHistory = gameState.marketHistory;
   const trade = gameState.trade;
 
-  // console.log("Players: ", allPlayers?.players);
-  // console.log("Market History: ", marketHistory.market);
+  // Default values for fair prices and goal chances if not provided
+  const defaultFairPrices: [number, number, number, number] = [
+    1.35, 6.8797, 10.56, 2.34,
+  ];
+  const defaultGoalChances: [number, number, number, number] = [
+    5.678, 20.34, 70.789, 4.595,
+  ];
 
   if (!trade.trade || !trade.buy || !trade.sell) {
     console.log("Error: Trade is not well defined.");
@@ -41,7 +53,9 @@ export const GameState = ({ gameState }: GameStateProps) => {
 
   // Choose color map based on transaction type
   const buyerColor = colorMap[trade.buy.player.color];
-  const sellerColor = colorMap[trade.sell.player.color]; // Define the two main visual blocks based on the type
+  const sellerColor = colorMap[trade.sell.player.color];
+
+  // Define the two main visual blocks based on the type
   const PriceBlock = (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
       <Typography variant="body1" sx={{ fontWeight: "bold", color: "white" }}>
@@ -135,6 +149,12 @@ export const GameState = ({ gameState }: GameStateProps) => {
       </AccordionSummary>
       <AccordionDetails>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Essential Data Section */}
+          <EssentialData
+            fairPrices={fairPrices || defaultFairPrices}
+            goalChances={goalChances || defaultGoalChances}
+          />
+
           {/* Player Summaries Section */}
           {allPlayers && <PlayerSummaries allPlayers={allPlayers} />}
 

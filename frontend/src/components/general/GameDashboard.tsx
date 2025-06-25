@@ -15,6 +15,7 @@ const GameDashboard = () => {
     useState<FullGameState | null>(null);
   const [gameStateLog, setGameStateLog] = useState<FullGameState[]>([]);
   const [marketLog, setMarketLog] = useState<BidOfferData[]>([]);
+  const [isGamePaused, setIsGamePaused] = useState(false);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -33,15 +34,18 @@ const GameDashboard = () => {
     // 2. Set up listeners for real-time updates from the background script
     const messageListener = (message: any) => {
       if (message.type === "INITIAL_GAME_STATE_UPDATED") {
-        console.log("Dashboard received initial state: ", message.payload);
+        // console.log("Dashboard received initial state: ", message.payload);
         setCurrentGameState(message.payload);
       } else if (message.type === "GAME_STATE_UPDATED") {
-        console.log("Dashboard received update: ", message.payload);
+        // console.log("Dashboard received update: ", message.payload);
         setCurrentGameState(message.payload.currentGameState);
         setGameStateLog(message.payload.gameStateLog);
         setMarketLog(message.payload.marketLog);
-      } else if (message.type === "BID_OFFER_UPDATE") {
+      } else if (message.type === "BID_OFFER_UPDATED") {
         setMarketLog(message.payload.marketLog);
+      } else if (message.type === "GAME_PAUSE_STATUS_UPDATED") {
+        setIsGamePaused(message.payload.paused);
+        console.log("Dashboard received pause status update: ", isGamePaused);
       }
     };
     chrome.runtime.onMessage.addListener(messageListener);
@@ -56,11 +60,12 @@ const GameDashboard = () => {
       case 0:
         return <Home gameState={currentGameState} />;
       case 1:
-        return <Genius />;
-      case 2:
         return <Data marketLog={marketLog} />;
-      case 3:
+      case 2:
         return <Logs gameStateLog={gameStateLog} />; // Pass the tradeLog to the Logs tab
+      case 3:
+        return <Genius />;
+
       default:
         return <Home gameState={currentGameState} />;
     }

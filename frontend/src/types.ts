@@ -88,3 +88,8 @@ export interface FullGameStateOld {
   markets: Record<string, SuitData>;
   lastTrade: TradeData | null;
 }
+
+export interface EssentialData {
+  fairPrices: number[];
+  goalChange: number[];
+}
